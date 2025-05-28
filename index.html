@@ -1,9 +1,8 @@
-<!-- INÍCIO DO CÓDIGO HTML COMPLETO COM UPLOAD E EDIÇÃO DE PRODUTOS -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DRICCA COSMÉTICOS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -11,344 +10,281 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #fdfdfd; margin: 0; padding: 0; }
-    header { background: #d63384; color: white; padding: 15px; text-align: center; font-size: 1.5em; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    .container { padding: 20px; max-width: 900px; margin: auto; }
-    .hidden { display: none !important; }
-    input, button, select, textarea {
-      padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc;
-    }
-    button { background-color: #d63384; color: white; border: none; cursor: pointer; transition: background 0.3s; min-height: 44px; }
-    button:hover { background-color: #c2185b; }
-    .title { margin-top: 20px; font-size: 1.3em; border-bottom: 2px solid #d63384; padding-bottom: 5px; color: #d63384; }
-    .produto, .produto-admin-item {
-      border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin: 10px 0;
-      display: flex; gap: 15px; align-items: center; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .produto img, .produto-admin-item img {
-      width: 80px; height: 80px; border-radius: 8px; object-fit: cover;
-    }
-    .carrinho-item {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #fafafa; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd;
-    }
-    .logout-button {
-      background: none; border: none; color: #d63384; font-size: 0.8em; cursor: pointer; margin-left: 10px;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fdfdfd; }
+    header { background: #d63384; color: white; padding: 15px; text-align: center; font-size: 1.5em; font-weight: bold; }
+    .container { max-width: 900px; margin: auto; padding: 20px; }
+    .hidden { display: none; }
+    input, button, select, textarea { width: 100%; margin: 5px 0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #d63384; color: white; border: none; cursor: pointer; }
+    button:hover { background: #c2185b; }
+    .title { font-size: 1.3em; margin-top: 20px; border-bottom: 2px solid #d63384; padding-bottom: 5px; color: #d63384; }
+    .produto, .produto-admin-item { display: flex; gap: 15px; align-items: center; background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin: 10px 0; }
+    .produto img, .produto-admin-item img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+    .carrinho-item { display: flex; justify-content: space-between; align-items: center; background: #fafafa; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; }
+    .logout-button { background: none; border: none; color: #d63384; cursor: pointer; font-size: 0.8em; margin-left: 10px; }
     .produto-form { border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <header><i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS</header>
-  <div class="container">
-    <div id="loginCliente">
-      <h2 class="title">Login</h2>
-      <input type="email" id="clienteEmail" placeholder="Email">
-      <input type="password" id="clienteSenha" placeholder="Senha">
-      <button onclick="loginCliente()">Entrar</button>
-      <button onclick="mostrarCadastroCliente()">Cadastrar</button>
-    </div>
-
-    <div id="cadastroCliente" class="hidden">
-      <h2 class="title">Cadastro</h2>
-      <input type="text" id="nomeCliente" placeholder="Nome">
-      <input type="email" id="emailCliente" placeholder="Email">
-      <input type="password" id="senhaCliente" placeholder="Senha">
-      <button onclick="cadastrarCliente()">Cadastrar</button>
-      <button onclick="mostrarLoginCliente()">Voltar</button>
-    </div>
-
-    <div id="areaCliente" class="hidden">
-      <h2 class="title">
-        Bem-vindo, <span id="nomeExibicao"></span>
-        <button class="logout-button" onclick="logoutCliente()">Sair</button>
-      </h2>
-      <div id="produtosContainer"></div>
-      <h3 class="title">Carrinho</h3>
-      <div id="carrinhoContainer"></div>
-      <input type="text" id="cupomInput" placeholder="Cupom de desconto">
-      <button onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
-    </div>
-
-    <div id="areaAdmin" class="hidden">
-      <h2 class="title">
-        Área do Administrador
-        <button class="logout-button" onclick="logoutCliente()">Sair</button>
-      </h2>
-      <h3 class="title">Cadastrar Produto</h3>
-      <div class="produto-form">
-        <input type="text" id="nomeProduto" placeholder="Nome do Produto">
-        <input type="text" id="descricaoProduto" placeholder="Descrição">
-        <input type="number" id="precoProduto" placeholder="Preço">
-        <input type="number" id="quantidadeProduto" placeholder="Quantidade">
-        <input type="file" id="imagemUploadProduto">
-        <button onclick="cadastrarProduto()">Cadastrar Produto</button>
-      </div>
-
-      <h3 class="title">Produtos Cadastrados</h3>
-      <div id="produtosAdminContainer"></div>
-
-      <h3 class="title">Pedidos Recebidos</h3>
-      <div id="pedidosAdminContainer"></div>
-    </div>
+<header><i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS</header>
+<div class="container">
+  <div id="loginCliente">
+    <h2 class="title">Login</h2>
+    <input type="email" id="clienteEmail" placeholder="Email">
+    <input type="password" id="clienteSenha" placeholder="Senha">
+    <button onclick="loginCliente()">Entrar</button>
+    <button onclick="mostrarCadastroCliente()">Cadastrar</button>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
-      authDomain: "dricca-ecommerce.firebaseapp.com",
-      projectId: "dricca-ecommerce",
-      storageBucket: "dricca-ecommerce.appspot.com",
-      messagingSenderId: "202913391561",
-      appId: "1:202913391561:web:50cddc607a67540be4be18"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+  <div id="cadastroCliente" class="hidden">
+    <h2 class="title">Cadastro</h2>
+    <input type="text" id="nomeCliente" placeholder="Nome">
+    <input type="email" id="emailCliente" placeholder="Email">
+    <input type="password" id="senhaCliente" placeholder="Senha">
+    <button onclick="cadastrarCliente()">Cadastrar</button>
+    <button onclick="mostrarLoginCliente()">Voltar</button>
+  </div>
 
-    let usuarioAtual = null;
-    let carrinho = [];
+  <div id="areaCliente" class="hidden">
+    <h2 class="title">Bem-vindo, <span id="nomeExibicao"></span>
+      <button class="logout-button" onclick="logoutCliente()">Sair</button>
+    </h2>
+    <div id="produtosContainer"></div>
+    <h3 class="title">Carrinho</h3>
+    <div id="carrinhoContainer"></div>
+    <input type="text" id="cupomInput" placeholder="Cupom de desconto">
+    <button onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
+  </div>
 
-    function mostrarCadastroCliente() {
-      document.getElementById('loginCliente').classList.add('hidden');
-      document.getElementById('cadastroCliente').classList.remove('hidden');
-    }
+  <div id="areaAdmin" class="hidden">
+    <h2 class="title">Área do Administrador
+      <button class="logout-button" onclick="logoutCliente()">Sair</button>
+    </h2>
+    <h3 class="title">Cadastrar Produto</h3>
+    <div class="produto-form">
+      <input type="text" id="nomeProduto" placeholder="Nome">
+      <input type="text" id="descricaoProduto" placeholder="Descrição">
+      <input type="number" id="precoProduto" placeholder="Preço">
+      <input type="number" id="quantidadeProduto" placeholder="Quantidade">
+      <input type="file" id="imagemUploadProduto">
+      <button onclick="cadastrarProduto()">Cadastrar</button>
+    </div>
 
-    function mostrarLoginCliente() {
-      document.getElementById('cadastroCliente').classList.add('hidden');
-      document.getElementById('loginCliente').classList.remove('hidden');
-    }
+    <h3 class="title">Produtos Cadastrados</h3>
+    <div id="produtosAdminContainer"></div>
 
-    function mostrarAreaCliente(nome) {
-      document.getElementById('loginCliente').classList.add('hidden');
-      document.getElementById('cadastroCliente').classList.add('hidden');
-      document.getElementById('areaCliente').classList.remove('hidden');
-      document.getElementById('areaAdmin').classList.add('hidden');
-      document.getElementById('nomeExibicao').innerText = nome;
-      listarProdutos();
-    }
+    <h3 class="title">Pedidos Recebidos</h3>
+    <div id="pedidosAdminContainer"></div>
+  </div>
+</div>
 
-    function mostrarAreaAdmin() {
-      document.getElementById('loginCliente').classList.add('hidden');
-      document.getElementById('cadastroCliente').classList.add('hidden');
-      document.getElementById('areaCliente').classList.add('hidden');
-      document.getElementById('areaAdmin').classList.remove('hidden');
-      listarProdutosAdmin();
-      listarPedidosAdmin();
-    }
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
+    authDomain: "dricca-ecommerce.firebaseapp.com",
+    projectId: "dricca-ecommerce",
+    storageBucket: "dricca-ecommerce.appspot.com",
+    messagingSenderId: "202913391561",
+    appId: "1:202913391561:web:50cddc607a67540be4be18"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
 
-    function cadastrarCliente() {
-      const nome = document.getElementById('nomeCliente').value;
-      const email = document.getElementById('emailCliente').value;
-      const senha = document.getElementById('senhaCliente').value;
-      auth.createUserWithEmailAndPassword(email, senha)
-        .then(cred => db.collection("clientes").doc(cred.user.uid).set({ nome, email }))
-        .then(() => {
-          alert("Cadastro realizado!");
-          mostrarLoginCliente();
-        })
-        .catch(e => alert("Erro: " + e.message));
-    }
+  let usuarioAtual = null;
+  let carrinho = [];
 
-    function loginCliente() {
-      const email = document.getElementById('clienteEmail').value;
-      const senha = document.getElementById('clienteSenha').value;
+  function mostrarCadastroCliente() {
+    document.getElementById('loginCliente').classList.add('hidden');
+    document.getElementById('cadastroCliente').classList.remove('hidden');
+  }
 
-      auth.signInWithEmailAndPassword(email, senha)
-        .then(cred => db.collection("clientes").doc(cred.user.uid).get())
-        .then(doc => {
-          if (doc.exists) {
-            usuarioAtual = doc.data();
-            if (usuarioAtual.email === 'adrielefreitas0108@gmail.com') {
-              mostrarAreaAdmin();
-            } else {
-              mostrarAreaCliente(usuarioAtual.nome);
-            }
-          }
-        })
-        .catch(e => alert("Erro: " + e.message));
-    }
+  function mostrarLoginCliente() {
+    document.getElementById('cadastroCliente').classList.add('hidden');
+    document.getElementById('loginCliente').classList.remove('hidden');
+  }
 
-    function listarProdutos() {
-      const container = document.getElementById("produtosContainer");
-      container.innerHTML = "";
-      db.collection("produtos").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const p = doc.data();
-          const id = doc.id;
-          container.innerHTML += `
-            <div class="produto">
-              <img src="${p.imagem}">
-              <div>
-                <strong>${p.nome}</strong><br>${p.descricao}<br>
-                <strong>R$ ${p.preco.toFixed(2)}</strong><br>Estoque: ${p.quantidade}<br><br>
-                <button onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">Adicionar</button>
-              </div>
-            </div>`;
-        });
-      });
-    }
+  function mostrarAreaCliente(nome) {
+    document.getElementById('loginCliente').classList.add('hidden');
+    document.getElementById('cadastroCliente').classList.add('hidden');
+    document.getElementById('areaCliente').classList.remove('hidden');
+    document.getElementById('areaAdmin').classList.add('hidden');
+    document.getElementById('nomeExibicao').innerText = nome;
+    listarProdutos();
+  }
 
-    function adicionarAoCarrinho(id, preco, nome) {
-      const existente = carrinho.find(i => i.id === id);
-      if (existente) {
-        existente.qtd++;
-      } else {
-        carrinho.push({ id, nome, preco, qtd: 1 });
-      }
-      renderizarCarrinho();
-    }
+  function mostrarAreaAdmin() {
+    document.getElementById('loginCliente').classList.add('hidden');
+    document.getElementById('cadastroCliente').classList.add('hidden');
+    document.getElementById('areaCliente').classList.add('hidden');
+    document.getElementById('areaAdmin').classList.remove('hidden');
+    listarProdutosAdmin();
+    listarPedidosAdmin();
+  }
 
-    function renderizarCarrinho() {
-      const container = document.getElementById("carrinhoContainer");
-      container.innerHTML = "";
-      carrinho.forEach(item => {
-        container.innerHTML += `<div class='carrinho-item'>${item.nome} (Qtd: ${item.qtd})
-          <button onclick="removerDoCarrinho('${item.id}')">Remover</button></div>`;
-      });
-    }
-
-    function removerDoCarrinho(id) {
-      carrinho = carrinho.filter(i => i.id !== id);
-      renderizarCarrinho();
-    }
-
-    function finalizarPedido() {
-      const cupom = document.getElementById("cupomInput").value.trim();
-      let total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
-      let msg = `Olá, sou ${usuarioAtual.nome}. Gostaria de fazer um pedido:%0A`;
-      carrinho.forEach(i => msg += `- ${i.nome} (Qtd: ${i.qtd})%0A`);
-      if (cupom === "DESCONTO10") {
-        total *= 0.9;
-        msg += `Cupom aplicado: DESCONTO10 (10%% OFF)%0A`;
-      }
-      msg += `Total: R$ ${total.toFixed(2)}`;
-      db.collection("pedidos").add({ nome: usuarioAtual.nome, total: total.toFixed(2), data: new Date().toISOString(), itens: carrinho });
-      window.open(`https://wa.me/5593988098093?text=${msg}`, '_blank');
-      carrinho = [];
-      renderizarCarrinho();
-    }
-
-    function logoutCliente() {
-      auth.signOut().then(() => {
-        usuarioAtual = null;
-        carrinho = [];
-        document.getElementById('areaCliente').classList.add('hidden');
-        document.getElementById('areaAdmin').classList.add('hidden');
-        document.getElementById('loginCliente').classList.remove('hidden');
-      });
-    }
-
-    function cadastrarProduto() {
-      const nome = document.getElementById('nomeProduto').value;
-      const descricao = document.getElementById('descricaoProduto').value;
-      const preco = parseFloat(document.getElementById('precoProduto').value);
-      const quantidade = parseInt(document.getElementById('quantidadeProduto').value);
-      const imagemFile = document.getElementById('imagemUploadProduto').files[0];
-
-      if (!imagemFile) {
-        alert("Selecione uma imagem.");
-        return;
-      }
-
-      const storageRef = storage.ref('produtos/' + Date.now() + '_' + imagemFile.name);
-      storageRef.put(imagemFile).then(snapshot => snapshot.ref.getDownloadURL())
-      .then(url => {
-        return db.collection("produtos").add({ nome, descricao, preco, quantidade, imagem: url });
-      })
-      .then(() => {
-        alert("Produto cadastrado com sucesso!");
-        listarProdutosAdmin();
-      })
+  function cadastrarCliente() {
+    const nome = document.getElementById('nomeCliente').value.trim();
+    const email = document.getElementById('emailCliente').value.trim();
+    const senha = document.getElementById('senhaCliente').value.trim();
+    if (!nome || !email || !senha) return alert("Preencha todos os campos.");
+    auth.createUserWithEmailAndPassword(email, senha)
+      .then(cred => db.collection("clientes").doc(cred.user.uid).set({ nome, email }))
+      .then(() => { alert("Cadastro realizado!"); mostrarLoginCliente(); })
       .catch(e => alert("Erro: " + e.message));
-    }
+  }
 
-    function listarProdutosAdmin() {
-      const container = document.getElementById("produtosAdminContainer");
-      container.innerHTML = "";
-      db.collection("produtos").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const p = doc.data();
-          const id = doc.id;
-          container.innerHTML += `
-            <div class="produto-admin-item">
-              <img src="${p.imagem}">
-              <div>
-                <strong>${p.nome}</strong><br>${p.descricao}<br>
-                <strong>R$ ${p.preco.toFixed(2)}</strong><br>Estoque: ${p.quantidade}<br><br>
-                <button onclick="excluirProduto('${id}')">Excluir</button>
-                <button onclick="mostrarFormularioEdicao('${id}', '${p.nome}', '${p.descricao}', ${p.preco}, ${p.quantidade}, '${p.imagem}')">Editar</button>
-              </div>
-            </div>`;
-        });
-      });
-    }
-
-    function excluirProduto(id) {
-      if (confirm("Tem certeza que deseja excluir este produto?")) {
-        db.collection("produtos").doc(id).delete().then(() => {
-          alert("Produto excluído!");
-          listarProdutosAdmin();
-        });
-      }
-    }
-
-    function mostrarFormularioEdicao(id, nome, descricao, preco, quantidade, imagem) {
-      const novosDados = prompt("Editar (separado por vírgula): Nome,Descrição,Preço,Quantidade", `${nome},${descricao},${preco},${quantidade}`);
-      if (!novosDados) return;
-      const [novoNome, novaDescricao, novoPreco, novaQuantidade] = novosDados.split(',');
-
-      db.collection("produtos").doc(id).update({
-        nome: novoNome,
-        descricao: novaDescricao,
-        preco: parseFloat(novoPreco),
-        quantidade: parseInt(novaQuantidade),
-      }).then(() => {
-        alert("Produto atualizado!");
-        listarProdutosAdmin();
+  function loginCliente() {
+    const email = document.getElementById('clienteEmail').value.trim();
+    const senha = document.getElementById('clienteSenha').value.trim();
+    auth.signInWithEmailAndPassword(email, senha)
+      .then(cred => db.collection("clientes").doc(cred.user.uid).get())
+      .then(doc => {
+        if (doc.exists) {
+          usuarioAtual = doc.data();
+          usuarioAtual.email === 'adrielefreitas0108@gmail.com' ? mostrarAreaAdmin() : mostrarAreaCliente(usuarioAtual.nome);
+        }
       }).catch(e => alert("Erro: " + e.message));
-    }
+  }
 
-    function listarPedidosAdmin() {
-      const container = document.getElementById("pedidosAdminContainer");
-      container.innerHTML = "";
-      db.collection("pedidos").orderBy("data", "desc").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const p = doc.data();
-          const data = new Date(p.data).toLocaleString();
-          let itens = "";
-          p.itens.forEach(i => {
-            itens += `- ${i.nome} (Qtd: ${i.qtd})<br>`;
-          });
-          container.innerHTML += `
-            <div class="produto-admin-item">
-              <div>
-                <strong>${p.nome}</strong><br>
-                Total: R$ ${p.total}<br>
-                Data: ${data}<br>
-                <details><summary>Itens</summary>${itens}</details>
-              </div>
-            </div>`;
-        });
+  function listarProdutos() {
+    const container = document.getElementById("produtosContainer");
+    container.innerHTML = "";
+    db.collection("produtos").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        const id = doc.id;
+        container.innerHTML += `<div class="produto"><img src="${p.imagem}">
+        <div><strong>${p.nome}</strong><br>${p.descricao}<br>
+        <strong>R$ ${p.preco.toFixed(2)}</strong><br>Estoque: ${p.quantidade}<br>
+        <button onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">Adicionar</button></div></div>`;
+      });
+    });
+  }
+
+  function adicionarAoCarrinho(id, preco, nome) {
+    const item = carrinho.find(i => i.id === id);
+    item ? item.qtd++ : carrinho.push({ id, nome, preco, qtd: 1 });
+    renderizarCarrinho();
+  }
+
+  function renderizarCarrinho() {
+    const container = document.getElementById("carrinhoContainer");
+    container.innerHTML = "";
+    carrinho.forEach(item => {
+      container.innerHTML += `<div class="carrinho-item">${item.nome} (Qtd: ${item.qtd})
+      <button onclick="removerDoCarrinho('${item.id}')">Remover</button></div>`;
+    });
+  }
+
+  function removerDoCarrinho(id) {
+    carrinho = carrinho.filter(i => i.id !== id);
+    renderizarCarrinho();
+  }
+
+  function finalizarPedido() {
+    const cupom = document.getElementById("cupomInput").value.trim();
+    let total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
+    let msg = `Olá, sou ${usuarioAtual.nome}. Pedido:%0A`;
+    carrinho.forEach(i => msg += `- ${i.nome} (Qtd: ${i.qtd})%0A`);
+    if (cupom === "DESCONTO10") { total *= 0.9; msg += `Cupom: DESCONTO10 (10% OFF)%0A`; }
+    msg += `Total: R$ ${total.toFixed(2)}`;
+    db.collection("pedidos").add({ nome: usuarioAtual.nome, total: total.toFixed(2), data: new Date().toISOString(), itens: carrinho });
+    window.open(`https://wa.me/5593988098093?text=${msg}`, '_blank');
+    carrinho = []; renderizarCarrinho();
+  }
+
+  function logoutCliente() {
+    auth.signOut().then(() => {
+      usuarioAtual = null;
+      carrinho = [];
+      document.getElementById('areaCliente').classList.add('hidden');
+      document.getElementById('areaAdmin').classList.add('hidden');
+      document.getElementById('loginCliente').classList.remove('hidden');
+    });
+  }
+
+  function cadastrarProduto() {
+    const nome = document.getElementById('nomeProduto').value.trim();
+    const descricao = document.getElementById('descricaoProduto').value.trim();
+    const preco = parseFloat(document.getElementById('precoProduto').value);
+    const quantidade = parseInt(document.getElementById('quantidadeProduto').value);
+    const imagemFile = document.getElementById('imagemUploadProduto').files[0];
+    if (!nome || !descricao || isNaN(preco) || isNaN(quantidade) || !imagemFile) return alert("Preencha todos os campos e selecione imagem.");
+
+    const storageRef = storage.ref('produtos/' + Date.now() + '_' + imagemFile.name);
+    storageRef.put(imagemFile).then(snapshot => snapshot.ref.getDownloadURL())
+    .then(url => db.collection("produtos").add({ nome, descricao, preco, quantidade, imagem: url }))
+    .then(() => { alert("Produto cadastrado!"); listarProdutosAdmin(); })
+    .catch(e => alert("Erro: " + e.message));
+  }
+
+  function listarProdutosAdmin() {
+    const container = document.getElementById("produtosAdminContainer");
+    container.innerHTML = "";
+    db.collection("produtos").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const p = doc.data(); const id = doc.id;
+        container.innerHTML += `<div class="produto-admin-item">
+        <img src="${p.imagem}">
+        <div><strong>${p.nome}</strong><br>${p.descricao}<br>R$ ${p.preco}<br>Estoque: ${p.quantidade}
+        <br><button onclick="excluirProduto('${id}')">Excluir</button>
+        <button onclick="editarProduto('${id}')">Editar</button></div></div>`;
+      });
+    });
+  }
+
+  function excluirProduto(id) {
+    if (confirm("Excluir produto?")) {
+      db.collection("produtos").doc(id).delete().then(() => { alert("Excluído!"); listarProdutosAdmin(); });
+    }
+  }
+
+  function editarProduto(id) {
+    const novoNome = prompt("Novo nome:");
+    const novaDescricao = prompt("Nova descrição:");
+    const novoPreco = parseFloat(prompt("Novo preço:"));
+    const novaQuantidade = parseInt(prompt("Nova quantidade:"));
+    const imagemFile = prompt("Deseja enviar nova imagem? Deixe vazio para manter.");
+
+    if (!novoNome || !novaDescricao || isNaN(novoPreco) || isNaN(novaQuantidade)) return alert("Dados inválidos.");
+
+    const atualiza = (url) => db.collection("produtos").doc(id).update({ nome: novoNome, descricao: novaDescricao, preco: novoPreco, quantidade: novaQuantidade, ...(url && { imagem: url }) })
+      .then(() => { alert("Atualizado!"); listarProdutosAdmin(); });
+
+    if (imagemFile) {
+      const file = document.createElement('input'); file.type = 'file';
+      file.onchange = e => {
+        const upload = e.target.files[0];
+        const storageRef = storage.ref('produtos/' + Date.now() + '_' + upload.name);
+        storageRef.put(upload).then(snapshot => snapshot.ref.getDownloadURL()).then(url => atualiza(url));
+      };
+      file.click();
+    } else { atualiza(); }
+  }
+
+  function listarPedidosAdmin() {
+    const container = document.getElementById("pedidosAdminContainer");
+    container.innerHTML = "";
+    db.collection("pedidos").orderBy("data", "desc").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        let itens = ""; p.itens.forEach(i => itens += `- ${i.nome} (Qtd: ${i.qtd})<br>`);
+        container.innerHTML += `<div class="produto-admin-item">
+        <div><strong>${p.nome}</strong><br>Total: R$ ${p.total}<br>${new Date(p.data).toLocaleString()}<br>
+        <details><summary>Itens</summary>${itens}</details></div></div>`;
+      });
+    });
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      db.collection("clientes").doc(user.uid).get().then(doc => {
+        usuarioAtual = doc.data();
+        usuarioAtual.email === 'adrielefreitas0108@gmail.com' ? mostrarAreaAdmin() : mostrarAreaCliente(usuarioAtual.nome);
       });
     }
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        db.collection("clientes").doc(user.uid).get().then(doc => {
-          if (doc.exists) {
-            usuarioAtual = doc.data();
-            if (usuarioAtual.email === 'adrielefreitas0108@gmail.com') {
-              mostrarAreaAdmin();
-            } else {
-              mostrarAreaCliente(usuarioAtual.nome);
-            }
-          }
-        });
-      }
-    });
-  </script>
+  });
+</script>
 </body>
 </html>
-<!-- FIM DO CÓDIGO COMPLETO -->

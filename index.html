@@ -1,4 +1,3 @@
-<!-- Código atualizado e completo DRICCA COSMÉTICOS -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -115,6 +114,7 @@
     document.getElementById('cadastroCliente').classList.add('hidden');
     document.getElementById('areaCliente').classList.add('hidden');
     document.getElementById('areaAdmin').classList.remove('hidden');
+
     listarProdutosAdmin();
     listarPedidosAdmin();
   }
@@ -145,7 +145,7 @@
 
   function listarProdutos() {
     const container = document.getElementById("produtosContainer");
-    container.innerHTML = ""; // ✅ PREVINE DUPLICAÇÃO
+    container.innerHTML = "";
     db.collection("produtos").get().then(snapshot => {
       snapshot.forEach(doc => {
         const p = doc.data();
@@ -210,7 +210,12 @@
     const preco = parseFloat(document.getElementById('precoProduto').value);
     const quantidade = parseInt(document.getElementById('quantidadeProduto').value);
     const imagem = document.getElementById('imagemProduto').value.trim();
-    if (!nome || !descricao || isNaN(preco) || isNaN(quantidade) || !imagem) return alert("Preencha todos os campos.");
+
+    if (!nome || !descricao || isNaN(preco) || isNaN(quantidade) || !imagem) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+
     db.collection("produtos").add({ nome, descricao, preco, quantidade, imagem })
       .then(() => {
         alert("Produto cadastrado!");
@@ -219,14 +224,14 @@
         document.getElementById('precoProduto').value = "";
         document.getElementById('quantidadeProduto').value = "";
         document.getElementById('imagemProduto').value = "";
-        listarProdutosAdmin();
+        // ❌ NÃO chama listarProdutosAdmin aqui para evitar duplicação!
       })
       .catch(e => alert("Erro: " + e.message));
   }
 
   function listarProdutosAdmin() {
     const container = document.getElementById("produtosAdminContainer");
-    container.innerHTML = ""; // ✅ PREVINE DUPLICAÇÃO
+    container.innerHTML = "";
     db.collection("produtos").get().then(snapshot => {
       snapshot.forEach(doc => {
         const p = doc.data(); const id = doc.id;

@@ -1,3 +1,4 @@
+<!-- Código atualizado e completo DRICCA COSMÉTICOS -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,18 +10,18 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fdfdfd; }
-    header { background: #d63384; color: white; padding: 15px; text-align: center; font-size: 1.5em; font-weight: bold; }
-    .container { max-width: 900px; margin: auto; padding: 20px; }
-    .hidden { display: none; }
-    input, button { width: 100%; margin: 5px 0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #d63384; color: white; border: none; cursor: pointer; }
-    button:hover { background: #c2185b; }
-    .title { font-size: 1.3em; margin-top: 20px; border-bottom: 2px solid #d63384; padding-bottom: 5px; color: #d63384; }
-    .produto, .produto-admin-item { display: flex; gap: 15px; align-items: center; background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin: 10px 0; }
-    .produto img, .produto-admin-item img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
-    .carrinho-item { display: flex; justify-content: space-between; align-items: center; background: #fafafa; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; }
-    .logout-button { background: none; border: none; color: #d63384; cursor: pointer; font-size: 0.8em; margin-left: 10px; }
+    body { font-family: Arial; margin:0; padding:0; background:#fdfdfd; }
+    header { background:#d63384; color:#fff; padding:15px; text-align:center; font-size:1.5em; font-weight:bold; }
+    .container { max-width:900px; margin:auto; padding:20px; }
+    .hidden { display:none; }
+    input, button { width:100%; margin:5px 0; padding:10px; border-radius:5px; border:1px solid #ccc; }
+    button { background:#d63384; color:#fff; border:none; cursor:pointer; }
+    button:hover { background:#c2185b; }
+    .title { font-size:1.3em; margin-top:20px; border-bottom:2px solid #d63384; padding-bottom:5px; color:#d63384; }
+    .produto, .produto-admin-item { display:flex; gap:15px; align-items:center; background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px; margin:10px 0; }
+    .produto img, .produto-admin-item img { width:80px; height:80px; border-radius:8px; object-fit:cover; }
+    .carrinho-item { display:flex; justify-content:space-between; align-items:center; background:#fafafa; padding:8px; margin:5px 0; border-radius:5px; border:1px solid #ddd; }
+    .logout-button { background:none; border:none; color:#d63384; cursor:pointer; font-size:0.8em; margin-left:10px; }
   </style>
 </head>
 <body>
@@ -211,7 +212,15 @@
     const imagem = document.getElementById('imagemProduto').value.trim();
     if (!nome || !descricao || isNaN(preco) || isNaN(quantidade) || !imagem) return alert("Preencha todos os campos.");
     db.collection("produtos").add({ nome, descricao, preco, quantidade, imagem })
-      .then(() => { alert("Produto cadastrado!"); listarProdutosAdmin(); })
+      .then(() => {
+        alert("Produto cadastrado!");
+        document.getElementById('nomeProduto').value = "";
+        document.getElementById('descricaoProduto').value = "";
+        document.getElementById('precoProduto').value = "";
+        document.getElementById('quantidadeProduto').value = "";
+        document.getElementById('imagemProduto').value = "";
+        listarProdutosAdmin();
+      })
       .catch(e => alert("Erro: " + e.message));
   }
 

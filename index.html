@@ -73,6 +73,7 @@
     <h3 class="title">Pedidos Recebidos</h3>
     <div id="pedidosAdminContainer"></div>
   </div>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
@@ -139,6 +140,79 @@
           usuarioAtual.email === 'adrielefreitas0108@gmail.com' ? mostrarAreaAdmin() : mostrarAreaCliente(usuarioAtual.nome);
         }
       }).catch(e => alert("Erro: " + e.message));
+  }
+
+  function cadastrarProduto() {
+    const nome = document.getElementById('nomeProduto').value.trim();
+    const descricao = document.getElementById('descricaoProduto').value.trim();
+    const preco = parseFloat(document.getElementById('precoProduto').value);
+    const quantidade = parseInt(document.getElementById('quantidadeProduto').value);
+    const imagem = document.getElementById('imagemProduto').value.trim();
+
+    if (!nome || !descricao || isNaN(preco) || isNaN(quantidade) || !imagem) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+
+    db.collection("produtos")
+      .where("nome", "==", nome)
+      .where("imagem", "==", imagem)
+      .get()
+      .then(snapshot => {
+        if (!snapshot.empty) {
+          alert("Já existe um produto com esse nome e imagem.");
+          return;
+        }
+        return db.collection("produtos").add({ nome, descricao, preco, quantidade, imagem })
+          .then(() => {
+            alert("Produto cadastrado!");
+            document.getElementById('nomeProduto').value = "";
+            document.getElementById('descricaoProduto').value = "";
+            document.getElementById('precoProduto').value = "";
+            document.getElementById('quantidadeProduto').value = "";
+            document.getElementById('imagemProduto').value = "";
+            listarProdutosAdmin();
+          });
+      })
+      .catch(e => alert("Erro: " + e.message));
+  }
+
+  function listarProdutosAdmin() {
+    const container = document.getElementById("produtosAdminContainer");
+    container.innerHTML = "";
+    db.collection("produtos").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        const id = doc.id;
+        container.innerHTML += `<div class="produto-admin-item">
+          <img src="${p.imagem}" alt="${p.nome}">
+          <div><strong>${p.nome}</strong><br>${p.descricao}<br>R$ ${p.preco}<br>Estoque: ${p.quantidade}
+          <br><button onclick="excluirProduto('${id}')">Excluir</button>
+          <button onclick="editarProduto('${id}')">Editar</button></div></div>`;
+      });
+    });
+  }
+
+  function excluirProduto(id) {
+    if (confirm("Excluir produto?")) {
+      db.collection("produtos").doc(id).delete().then(() => {
+        alert("Excluído!");
+        listarProdutosAdmin();
+      });
+    }
+  }
+
+  function editarProduto(id) {
+    const novoNome = prompt("Novo nome:");
+    const novaDescricao = prompt("Nova descrição:");
+    const novoPreco = parseFloat(prompt("Novo preço:"));
+    const novaQuantidade = parseInt(prompt("Nova quantidade:"));
+    const novaImagem = prompt("Nova URL da imagem:");
+    if (!novoNome || !novaDescricao || isNaN(novoPreco) || isNaN(novaQuantidade) || !novaImagem) {
+      return alert("Preencha todos os campos.");
+    }
+    db.collection("produtos").doc(id).update({ nome: novoNome, descricao: novaDescricao, preco: novoPreco, quantidade: novaQuantidade, imagem: novaImagem })
+      .then(() => { alert("Atualizado!"); listarProdutosAdmin(); });
   }
 
   function listarProdutos() {
@@ -230,83 +304,12 @@
       });
   }
 
-  function logoutCliente() {
-    auth.signOut().then(() => {
-      usuarioAtual = null;
-      carrinho = [];
-      document.getElementById('areaCliente').classList.add('hidden');
-      document.getElementById('areaAdmin').classList.add('hidden');
-      document.getElementById('loginCliente').classList.remove('hidden');
-    });
-  }
-
-  function cadastrarProduto() {
-    const nome = document.getElementById('nomeProduto').value.trim();
-    const descricao = document.getElementById('descricaoProduto').value.trim();
-    const preco = parseFloat(document.getElementById('precoProduto').value);
-    const quantidade = parseInt(document.getElementById('quantidadeProduto').value);
-    const imagem = document.getElementById('imagemProduto').value.trim();
-    if (!nome || !descricao || isNaN(preco) || isNaN(quantidade) || !imagem) {
-      alert("Preencha todos os campos.");
-      return;
-    }
-    db.collection("produtos").add({ nome, descricao, preco, quantidade, imagem })
-      .then(() => {
-        alert("Produto cadastrado!");
-        document.getElementById('nomeProduto').value = "";
-        document.getElementById('descricaoProduto').value = "";
-        document.getElementById('precoProduto').value = "";
-        document.getElementById('quantidadeProduto').value = "";
-        document.getElementById('imagemProduto').value = "";
-      })
-      .catch(e => alert("Erro: " + e.message));
-  }
-
-  function listarProdutosAdmin() {
-    const container = document.getElementById("produtosAdminContainer");
-    container.innerHTML = "";
-    db.collection("produtos").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        const id = doc.id;
-        container.innerHTML += `<div class="produto-admin-item">
-          <img src="${p.imagem}" alt="${p.nome}">
-          <div><strong>${p.nome}</strong><br>${p.descricao}<br>R$ ${p.preco}<br>Estoque: ${p.quantidade}
-          <br><button onclick="excluirProduto('${id}')">Excluir</button>
-          <button onclick="editarProduto('${id}')">Editar</button></div></div>`;
-      });
-    });
-  }
-
-  function excluirProduto(id) {
-    if (confirm("Excluir produto?")) {
-      db.collection("produtos").doc(id).delete().then(() => {
-        alert("Excluído!");
-        listarProdutosAdmin();
-      });
-    }
-  }
-
-  function editarProduto(id) {
-    const novoNome = prompt("Novo nome:");
-    const novaDescricao = prompt("Nova descrição:");
-    const novoPreco = parseFloat(prompt("Novo preço:"));
-    const novaQuantidade = parseInt(prompt("Nova quantidade:"));
-    const novaImagem = prompt("Nova URL da imagem:");
-    if (!novoNome || !novaDescricao || isNaN(novoPreco) || isNaN(novaQuantidade) || !novaImagem) {
-      return alert("Preencha todos os campos.");
-    }
-    db.collection("produtos").doc(id).update({ nome: novoNome, descricao: novaDescricao, preco: novoPreco, quantidade: novaQuantidade, imagem: novaImagem })
-      .then(() => { alert("Atualizado!"); listarProdutosAdmin(); });
-  }
-
   function listarPedidosAdmin() {
     const container = document.getElementById("pedidosAdminContainer");
     container.innerHTML = "";
     db.collection("pedidos").orderBy("data", "desc").get().then(snapshot => {
       let totalVendas = 0;
       let totalPedidos = 0;
-
       snapshot.forEach(doc => {
         const p = doc.data();
         totalVendas += parseFloat(p.total);
@@ -317,7 +320,6 @@
           <div><strong>${p.nome}</strong><br>Total: R$ ${p.total}<br>${new Date(p.data).toLocaleString()}<br>
           <details><summary>Itens</summary>${itens}</details></div></div>`;
       });
-
       container.innerHTML = `<div class="produto-admin-item">
         <div><strong>📊 Estatísticas</strong><br>
         Total de pedidos: ${totalPedidos}<br>
@@ -326,14 +328,4 @@
     });
   }
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      db.collection("clientes").doc(user.uid).get().then(doc => {
-        usuarioAtual = doc.data();
-        usuarioAtual.email === 'adrielefreitas0108@gmail.com' ? mostrarAreaAdmin() : mostrarAreaCliente(usuarioAtual.nome);
-      });
-    }
-  });
-</script>
-</body>
-</html>
+  function logoutCliente() {

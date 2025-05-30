@@ -79,8 +79,7 @@
 <div id="produtosAdminContainer" class="space-y-2"></div>
 
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Gráfico de Vendas</h3>
-  <canvas id="graficoVendas" height="200"></canvas>
+  
 
   <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Mensagens de Suporte</h3>
   <div id="mensagensSuporte" class="space-y-2"></div>
@@ -352,13 +351,7 @@
       document.getElementById("painelVendas").innerHTML = `Total de Vendas: R$ ${total.toFixed(2)}`;
       const labels = Object.keys(vendasPorMes);
       const dados = Object.values(vendasPorMes);
-      new Chart(document.getElementById("graficoVendas"), {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{ label: 'Vendas por mês', data: dados, backgroundColor: '#d63384' }]
-        }
-      });
+      
     });
 
     db.collection("suporte").orderBy("data", "desc").get().then(snapshot => {

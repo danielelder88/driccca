@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#d63384" />
@@ -77,6 +76,8 @@
   <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
 <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Produtos Cadastrados</h3>
 <div id="produtosAdminContainer" class="space-y-2"></div>
+<h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Produtos Cadastrados</h3>
+<div id="produtosAdminContainer" class="space-y-2"></div>
 
 
   
@@ -132,6 +133,7 @@
     esconderTodasAsAreas();
     document.getElementById('areaAdmin').classList.remove('hidden');
     carregarPedidos();
+  listarProdutosAdmin();
   listarProdutosAdmin();
   }
 

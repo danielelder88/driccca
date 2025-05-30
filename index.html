@@ -73,6 +73,8 @@
   <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoQtd" placeholder="Quantidade" type="number" />
   <input class="p-2 border rounded w-full mb-2 hidden" id="produtoImagem" type="hidden" />
   <input accept="image/*" capture="environment" class="mb-2" id="inputImagem" onchange="uploadImagem(this)" type="file" />
+<input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="imagemExterna" placeholder="URL da imagem externa (Drive ou Web)" type="text" oninput="usarImagemExterna()" />
+<img id="previewImagem" class="w-full h-48 object-contain mb-2 hidden border" />
 
   <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
 

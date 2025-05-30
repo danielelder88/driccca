@@ -12,6 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#d63384" />
+  <link rel="manifest" href="manifest.json" />
 </head>
 <body class="bg-gray-50 min-h-screen">
   <header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md">
@@ -23,9 +24,9 @@
     <h2 class="text-xl font-bold text-pink-600 mb-4">Login</h2>
     <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="clienteEmail" placeholder="Email" type="email"/>
     <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="clienteSenha" placeholder="Senha" type="password"/>
-    <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" id="btnLogin">Entrar</button>
-    <button class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded mt-2 w-full" id="btnMostrarCadastro">Cadastrar</button>
-    <button class="bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 px-4 rounded mt-2 w-full" id="btnRecuperarSenha">Esqueci a senha</button>
+    <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="loginCliente()">Entrar</button>
+    <button class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarCadastroCliente()">Cadastrar</button>
+    <button class="bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="recuperarSenha()">Esqueci a senha</button>
   </div>
 
   <!-- Cadastro -->
@@ -83,20 +84,7 @@
   <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
 </div>
 <script>
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
-  authDomain: "dricca-ecommerce.firebaseapp.com",
-  projectId: "dricca-ecommerce",
-  storageBucket: "dricca-ecommerce.appspot.com",
-  messagingSenderId: "202913391561",
-  appId: "1:202913391561:web:50cddc607a67540be4be18"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
     authDomain: "dricca-ecommerce.firebaseapp.com",
     projectId: "dricca-ecommerce",
@@ -385,22 +373,5 @@ const firebaseConfig = {
     }
   });
 </script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  const btnLogin = document.getElementById("btnLogin");
-  if (btnLogin) btnLogin.addEventListener("click", loginCliente);
-
-  const btnMostrarCadastro = document.getElementById("btnMostrarCadastro");
-  if (btnMostrarCadastro) btnMostrarCadastro.addEventListener("click", mostrarCadastroCliente);
-
-  const btnRecuperarSenha = document.getElementById("btnRecuperarSenha");
-  if (btnRecuperarSenha) btnRecuperarSenha.addEventListener("click", recuperarSenha);
-
-  const btnLogout = document.querySelectorAll(".btnLogout");
-  btnLogout.forEach(b => b.addEventListener("click", logoutCliente));
-});
-</script>
-
 </body>
 </html>

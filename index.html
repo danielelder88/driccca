@@ -3,13 +3,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>DRICCA COSMÉTICOS</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdn.tailwindcss.com"></script></head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdn.tailwindcss.com"></script><meta content="#d63384" name="theme-color"/><link href="manifest.json" rel="manifest"/></head>
 <body class="bg-gray-50 min-h-screen">
 <header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md"><i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS</header>
 <div class="p-4 max-w-3xl w-full mx-auto px-4">
@@ -51,7 +51,9 @@
 <input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoDescricao" placeholder="Descrição" type="text"/>
 <input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoPreco" placeholder="Preço" type="number"/>
 <input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoQtd" placeholder="Quantidade" type="number"/>
-<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoImagem" placeholder="URL da imagem" type="text"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoImagem" placeholder="URL da imagem" type="hidden"/>
+<input accept="image/*" capture="environment" class="mb-2" id="inputImagem" onchange="uploadImagem(this)" type="file"/>
+
 <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
 <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
 <h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Gráfico de Vendas</h3>
@@ -424,6 +426,21 @@ function mostrarAreaAdmin() {
 function esconderTodasAsAreas() {
   const areas = ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'];
   areas.forEach(id => document.getElementById(id).classList.add('hidden'));
+}
+</script><script>
+function uploadImagem(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const storageRef = firebase.storage().ref();
+  const nomeArquivo = 'produtos/' + Date.now() + '_' + file.name;
+  const produtoImagemInput = document.getElementById("produtoImagem");
+
+  storageRef.child(nomeArquivo).put(file).then(snapshot => {
+    return snapshot.ref.getDownloadURL();
+  }).then(url => {
+    produtoImagemInput.value = url;
+    alert("Imagem enviada com sucesso!");
+  }).catch(e => alert("Erro ao enviar imagem: " + e.message));
 }
 </script></body>
 </html>

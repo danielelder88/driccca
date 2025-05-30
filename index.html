@@ -197,10 +197,19 @@
     });
   }
 
-  function adicionarAoCarrinho(id, preco, nome) {
-    const existente = carrinho.find(i => i.id === id);
-    if (existente) existente.qtd++;
-    else carrinho.push({ id, nome, preco, qtd: 1 });
+  function adicionarAoCarrinho(id, preco, nome, estoque) {
+  const existente = carrinho.find(i => i.id === id);
+  if (existente) {
+    if (existente.qtd < estoque) {
+      existente.qtd++;
+    } else {
+      return mostrarToast("Estoque insuficiente.");
+    }
+  } else {
+    carrinho.push({ id, nome, preco, qtd: 1, estoque });
+  }
+  renderizarCarrinho();
+});
     renderizarCarrinho();
   }
 

@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#d63384" />
@@ -40,7 +41,6 @@
   <!-- Área do Cliente -->
   <div class="bg-white p-6 rounded shadow mt-6 hidden" id="areaCliente">
     <h2 class="text-xl font-bold text-pink-600 mb-4">Bem-vindo, <span id="nomeExibicao"></span></h2>
-<button class="text-sm text-gray-500 hover:text-pink-600 underline mb-4" id="btnLogout">Sair</button>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" id="produtosContainer"></div>
 
     <h3 class="text-lg font-semibold mt-6 text-pink-600">Carrinho</h3>
@@ -57,7 +57,6 @@
 <!-- Painel Administrativo -->
 <div class="p-4 max-w-3xl w-full mx-auto hidden" id="areaAdmin">
   <h2 class="text-xl font-bold text-pink-600 mb-4">Painel Administrativo</h2>
-<button class="text-sm text-gray-500 hover:text-pink-600 underline mb-4" id="btnLogout">Sair</button>
 
   <div id="painelVendas" class="mb-4 text-green-700 font-semibold"></div>
 
@@ -73,10 +72,9 @@
   <input accept="image/*" capture="environment" class="mb-2" id="inputImagem" onchange="uploadImagem(this)" type="file" />
 
   <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
-<h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Produtos Cadastrados</h3>
-<div id="produtosAdminContainer" class="space-y-2"></div>
 
-  
+  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Gráfico de Vendas</h3>
+  <canvas id="graficoVendas" height="200"></canvas>
 
   <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Mensagens de Suporte</h3>
   <div id="mensagensSuporte" class="space-y-2"></div>
@@ -85,7 +83,20 @@
   <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
 </div>
 <script>
-  const firebaseConfig = {
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
+  authDomain: "dricca-ecommerce.firebaseapp.com",
+  projectId: "dricca-ecommerce",
+  storageBucket: "dricca-ecommerce.appspot.com",
+  messagingSenderId: "202913391561",
+  appId: "1:202913391561:web:50cddc607a67540be4be18"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const firebaseConfig = {
     apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
     authDomain: "dricca-ecommerce.firebaseapp.com",
     projectId: "dricca-ecommerce",
@@ -119,18 +130,17 @@
   }
 
   function mostrarAreaCliente(nome) {
-  esconderTodasAsAreas();
-  document.getElementById('areaCliente').classList.remove('hidden');
-  document.getElementById('nomeExibicao').innerText = nome;
-  listarProdutos();
-}
+    esconderTodasAsAreas();
+    document.getElementById('areaCliente').classList.remove('hidden');
+    document.getElementById('nomeExibicao').innerText = nome;
+    listarProdutos();
+  }
 
   function mostrarAreaAdmin() {
-  esconderTodasAsAreas();
-  document.getElementById('areaAdmin').classList.remove('hidden');
-  carregarPedidos();
-  listarProdutosAdmin();
-}
+    esconderTodasAsAreas();
+    document.getElementById('areaAdmin').classList.remove('hidden');
+    carregarPedidos();
+  }
 
   function esconderTodasAsAreas() {
     ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
@@ -179,30 +189,10 @@
   }
 
   function listarProdutos() {
-  const container = document.getElementById("produtosContainer");
-  container.innerHTML = "";
-  db.collection("produtos").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const p = doc.data();
-      const id = doc.id;
-      const esgotado = p.quantidade <= 0;
-
-      container.innerHTML += `
-        <div class="border p-3 rounded shadow">
-          <img src="${p.imagem}" class="w-full mb-2"/>
-          <strong>${p.nome}</strong><br>${p.descricao}<br>
-          <strong>R$ ${p.preco.toFixed(2)}</strong><br>
-          ${esgotado ? '<span class="text-red-600 font-bold">Produto Esgotado</span>' : 'Estoque: ' + p.quantidade}
-          <br><br>
-          <button ${esgotado ? 'disabled class="bg-gray-400 text-white py-1 px-3 rounded cursor-not-allowed"' : 'class="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded"'} 
-            onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">
-            ${esgotado ? 'Indisponível' : 'Adicionar'}
-          </button>
-        </div>`;
-    });
-  });
-}
-
+    const container = document.getElementById("produtosContainer");
+    container.innerHTML = "";
+    db.collection("produtos").get().then(snapshot => {
+      snapshot.forEach(doc => {
         const p = doc.data();
         const id = doc.id;
         container.innerHTML += `
@@ -348,7 +338,14 @@
       document.getElementById("painelVendas").innerHTML = `Total de Vendas: R$ ${total.toFixed(2)}`;
       const labels = Object.keys(vendasPorMes);
       const dados = Object.values(vendasPorMes);
+      new Chart(document.getElementById("graficoVendas"), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{ label: 'Vendas por mês', data: dados, backgroundColor: '#d63384' }]
+        }
       });
+    });
 
     db.collection("suporte").orderBy("data", "desc").get().then(snapshot => {
       const suporteContainer = document.getElementById("mensagensSuporte");
@@ -400,63 +397,10 @@ document.addEventListener("DOMContentLoaded", function() {
   const btnRecuperarSenha = document.getElementById("btnRecuperarSenha");
   if (btnRecuperarSenha) btnRecuperarSenha.addEventListener("click", recuperarSenha);
 
-  const btnLogout = document.querySelectorAll("#btnLogout");
+  const btnLogout = document.querySelectorAll(".btnLogout");
   btnLogout.forEach(b => b.addEventListener("click", logoutCliente));
 });
 </script>
 
 </body>
 </html>
-
-<script>
-let produtoEditandoId = null;
-
-function listarProdutosAdmin() {
-  const container = document.getElementById("produtosAdminContainer");
-  container.innerHTML = "";
-  db.collection("produtos").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const p = doc.data();
-      const id = doc.id;
-      container.innerHTML += `
-        <div class="border p-2 rounded shadow-sm bg-gray-50">
-          <strong>${p.nome}</strong> - R$ ${p.preco} - Estoque: ${p.quantidade}<br>
-          <button class="text-blue-600" onclick="editarProduto('${id}')">Editar</button> |
-          <button class="text-red-600" onclick="excluirProduto('${id}')">Excluir</button>
-        </div>
-      `;
-    });
-  });
-}
-
-function editarProduto(id) {
-  db.collection("produtos").doc(id).get().then(doc => {
-    const p = doc.data();
-    document.getElementById("produtoNome").value = p.nome;
-    document.getElementById("produtoDescricao").value = p.descricao;
-    document.getElementById("produtoPreco").value = p.preco;
-    document.getElementById("produtoQtd").value = p.quantidade;
-    document.getElementById("produtoImagem").value = p.imagem;
-    produtoEditandoId = id;
-    mostrarToast("Editando produto: " + p.nome);
-  });
-}
-
-function excluirProduto(id) {
-  if (confirm("Tem certeza que deseja excluir este produto?")) {
-    db.collection("produtos").doc(id).delete().then(() => {
-      mostrarToast("Produto excluído.");
-      listarProdutosAdmin();
-    });
-  }
-}
-
-function limparCamposProduto() {
-  document.getElementById("produtoNome").value = "";
-  document.getElementById("produtoDescricao").value = "";
-  document.getElementById("produtoPreco").value = "";
-  document.getElementById("produtoQtd").value = "";
-  document.getElementById("produtoImagem").value = "";
-  document.getElementById("inputImagem").value = "";
-}
-</script>

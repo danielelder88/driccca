@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DRICCA COSMÉTICOS - Sistema Completo</title>
+  <title>DRICCA COSMÉTICOS - Sistema Otimizado</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -13,83 +13,100 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="theme-color" content="#d63384" />
-  <link rel="manifest" href="manifest.json" />
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md">
-    <i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS
+<body class="bg-gray-100 min-h-screen font-sans">
+
+  <header class="bg-pink-600 text-white py-5 text-center text-3xl font-extrabold shadow-lg">
+    <i class="fa-solid fa-store mr-2"></i>DRICCA COSMÉTICOS
   </header>
 
-  <button class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded mt-4 w-full" onclick="logoutCliente()">Sair</button>
+  <main class="p-6 max-w-4xl mx-auto space-y-8">
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Cadastrar/Editar Cupom</h3>
-  <input class="p-2 border rounded w-full mb-2" id="codigoCupom" placeholder="Código do cupom" type="text" />
-  <input class="p-2 border rounded w-full mb-2" id="descontoCupom" placeholder="Desconto (%)" type="number" />
-  <input class="p-2 border rounded w-full mb-2" id="validadeCupom" placeholder="Validade (YYYY-MM-DD)" type="date" />
-  <button class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="salvarCupom()">Salvar Cupom</button>
-  <div id="emailLink" class="mt-2"></div>
+    <section id="areaCliente" class="hidden space-y-4">
+      <h2 class="text-2xl font-bold text-pink-600">Área do Cliente</h2>
+      <div id="produtosContainer" class="grid gap-4 sm:grid-cols-2"></div>
+      <div id="carrinhoContainer" class="space-y-2"></div>
+      <button onclick="finalizarPedido()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Finalizar Pedido</button>
+      <button onclick="logoutCliente()" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">Sair</button>
+    </section>
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Cupons Cadastrados</h3>
-  <div id="cuponsContainer" class="space-y-2"></div>
+    <section id="areaAdmin" class="hidden space-y-4">
+      <h2 class="text-2xl font-bold text-pink-600">Painel Administrativo</h2>
+      <div class="space-y-2">
+        <input id="produtoNome" placeholder="Nome" class="w-full border p-2 rounded" />
+        <input id="produtoDescricao" placeholder="Descrição" class="w-full border p-2 rounded" />
+        <input id="produtoPreco" type="number" placeholder="Preço" class="w-full border p-2 rounded" />
+        <input id="produtoQtd" type="number" placeholder="Quantidade" class="w-full border p-2 rounded" />
+        <input id="inputImagem" type="file" class="w-full" />
+        <button onclick="cadastrarProduto()" class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded">Cadastrar Produto</button>
+      </div>
+      <button onclick="logoutCliente()" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded">Sair</button>
+    </section>
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Histórico de uso de Cupons</h3>
-  <div id="historicoCuponsContainer" class="space-y-2"></div>
+    <section id="loginCliente" class="space-y-4">
+      <h2 class="text-2xl font-bold text-pink-600">Login</h2>
+      <input id="clienteEmail" placeholder="Email" type="email" class="w-full border p-2 rounded" />
+      <input id="clienteSenha" placeholder="Senha" type="password" class="w-full border p-2 rounded" />
+      <button onclick="loginCliente()" class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded">Entrar</button>
+    </section>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
-      authDomain: "dricca-ecommerce.firebaseapp.com",
-      projectId: "dricca-ecommerce",
-      storageBucket: "dricca-ecommerce.appspot.com",
-      messagingSenderId: "202913391561",
-      appId: "1:202913391561:web:50cddc607a67540be4be18"
-    };
+  </main>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
+    authDomain: "dricca-ecommerce.firebaseapp.com",
+    projectId: "dricca-ecommerce",
+    storageBucket: "dricca-ecommerce.appspot.com",
+    messagingSenderId: "202913391561",
+    appId: "1:202913391561:web:50cddc607a67540be4be18"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    function logoutCliente() {
-      auth.signOut().then(() => {
-        alert('Logout realizado com sucesso!');
-        location.reload();
-      });
+  const UI = {
+    show(id) { document.getElementById(id).classList.remove('hidden'); },
+    hide(id) { document.getElementById(id).classList.add('hidden'); },
+    resetForm(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
+  };
+
+  let usuarioAtual = null;
+
+  const Auth = {
+    login: async () => {
+      const email = document.getElementById('clienteEmail').value;
+      const senha = document.getElementById('clienteSenha').value;
+      try {
+        const cred = await auth.signInWithEmailAndPassword(email, senha);
+        usuarioAtual = { email };
+        UI.hide('loginCliente');
+        UI.show(email === 'admin@admin.com' ? 'areaAdmin' : 'areaCliente');
+      } catch (e) { alert(e.message); }
+    },
+    logout: async () => {
+      await auth.signOut();
+      usuarioAtual = null;
+      UI.hide('areaCliente'); UI.hide('areaAdmin'); UI.show('loginCliente');
     }
+  };
 
-    function salvarCupom() {
-      const codigo = document.getElementById('codigoCupom').value.trim().toUpperCase();
-      const desconto = parseFloat(document.getElementById('descontoCupom').value);
-      const validade = document.getElementById('validadeCupom').value;
-
-      if (!codigo || isNaN(desconto) || !validade) {
-        alert('Preencha todos os campos do cupom.');
-        return;
-      }
-
-      db.collection('cupons').add({ codigo, desconto, validade })
-        .then(() => {
-          alert('Cupom cadastrado com sucesso!');
-          listarCupons();
-        })
-        .catch(e => alert('Erro ao cadastrar: ' + e.message));
+  const Produto = {
+    cadastrar: async () => {
+      const nome = document.getElementById('produtoNome').value;
+      const descricao = document.getElementById('produtoDescricao').value;
+      const preco = parseFloat(document.getElementById('produtoPreco').value);
+      const quantidade = parseInt(document.getElementById('produtoQtd').value);
+      await db.collection('produtos').add({ nome, descricao, preco, quantidade });
+      UI.resetForm(['produtoNome', 'produtoDescricao', 'produtoPreco', 'produtoQtd']);
+      alert('Produto cadastrado!');
     }
+  };
 
-    function listarCupons() {
-      db.collection('cupons').get().then(snapshot => {
-        const container = document.getElementById('cuponsContainer');
-        container.innerHTML = '';
-        snapshot.forEach(doc => {
-          const c = doc.data();
-          container.innerHTML += `<div class='border p-2 rounded shadow-sm bg-gray-50'>
-            <strong>${c.codigo}</strong> - ${c.desconto}% até ${c.validade}
-          </div>`;
-        });
-      });
-    }
-
-    listarCupons();
-  </script>
+  document.querySelector('#loginCliente button').onclick = Auth.login;
+  document.querySelector('#areaCliente button:nth-child(4)').onclick = Auth.logout;
+  document.querySelector('#areaAdmin button:nth-child(7)').onclick = Auth.logout;
+  document.querySelector('#areaAdmin button:nth-child(6)').onclick = Produto.cadastrar;
+</script>
 </body>
 </html>

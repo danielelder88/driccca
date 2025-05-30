@@ -75,6 +75,9 @@
   <input accept="image/*" capture="environment" class="mb-2" id="inputImagem" onchange="uploadImagem(this)" type="file" />
 
   <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
+<h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Produtos Cadastrados</h3>
+<div id="produtosAdminContainer" class="space-y-2"></div>
+
 
   <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Gráfico de Vendas</h3>
   <canvas id="graficoVendas" height="200"></canvas>
@@ -130,6 +133,7 @@
     esconderTodasAsAreas();
     document.getElementById('areaAdmin').classList.remove('hidden');
     carregarPedidos();
+  listarProdutosAdmin();
   }
 
   function esconderTodasAsAreas() {
@@ -179,10 +183,30 @@
   }
 
   function listarProdutos() {
-    const container = document.getElementById("produtosContainer");
-    container.innerHTML = "";
-    db.collection("produtos").get().then(snapshot => {
-      snapshot.forEach(doc => {
+  const container = document.getElementById("produtosContainer");
+  container.innerHTML = "";
+  db.collection("produtos").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const id = doc.id;
+      const esgotado = p.quantidade <= 0;
+
+      container.innerHTML += `
+        <div class="border p-3 rounded shadow">
+          <img src="${p.imagem}" class="w-full mb-2"/>
+          <strong>${p.nome}</strong><br>${p.descricao}<br>
+          <strong>R$ ${p.preco.toFixed(2)}</strong><br>
+          ${esgotado ? '<span class="text-red-600 font-bold">Produto Esgotado</span>' : 'Estoque: ' + p.quantidade}
+          <br><br>
+          <button ${esgotado ? 'disabled class="bg-gray-400 text-white py-1 px-3 rounded cursor-not-allowed"' : 'class="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded"'} 
+            onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">
+            ${esgotado ? 'Indisponível' : 'Adicionar'}
+          </button>
+        </div>`;
+    });
+  });
+}
+
         const p = doc.data();
         const id = doc.id;
         container.innerHTML += `
@@ -374,6 +398,57 @@
       mostrarAreaAdmin();
     }
   });
+
+let produtoEditandoId = null;
+
+function listarProdutosAdmin() {
+  const container = document.getElementById("produtosAdminContainer");
+  container.innerHTML = "";
+  db.collection("produtos").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const id = doc.id;
+      container.innerHTML += `
+        <div class="border p-2 rounded shadow-sm bg-gray-50">
+          <strong>${p.nome}</strong> - R$ ${p.preco} - Estoque: ${p.quantidade}<br>
+          <button class="text-blue-600" onclick="editarProduto('${id}')">Editar</button> |
+          <button class="text-red-600" onclick="excluirProduto('${id}')">Excluir</button>
+        </div>
+      `;
+    });
+  });
+}
+
+function editarProduto(id) {
+  db.collection("produtos").doc(id).get().then(doc => {
+    const p = doc.data();
+    document.getElementById("produtoNome").value = p.nome;
+    document.getElementById("produtoDescricao").value = p.descricao;
+    document.getElementById("produtoPreco").value = p.preco;
+    document.getElementById("produtoQtd").value = p.quantidade;
+    document.getElementById("produtoImagem").value = p.imagem;
+    produtoEditandoId = id;
+    mostrarToast("Editando produto: " + p.nome);
+  });
+}
+
+function excluirProduto(id) {
+  if (confirm("Tem certeza que deseja excluir este produto?")) {
+    db.collection("produtos").doc(id).delete().then(() => {
+      mostrarToast("Produto excluído.");
+      listarProdutosAdmin();
+    });
+  }
+}
+
+function limparCamposProduto() {
+  document.getElementById("produtoNome").value = "";
+  document.getElementById("produtoDescricao").value = "";
+  document.getElementById("produtoPreco").value = "";
+  document.getElementById("produtoQtd").value = "";
+  document.getElementById("produtoImagem").value = "";
+  document.getElementById("inputImagem").value = "";
+}
 </script>
 </body>
 </html>

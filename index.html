@@ -123,24 +123,24 @@
   }
 
   function mostrarAreaCliente(nome) {
-    esconderTodasAsAreas();
-    document.getElementById('areaCliente').classList.remove('hidden');
-    document.getElementById('nomeExibicao').innerText = nome;
-    listarProdutos();
-  }
+  esconderTodasAsAreas();
+  document.getElementById('areaCliente').classList.remove('hidden');
+  document.getElementById('nomeExibicao').innerText = nome;
+  listarProdutos();
+}
 
   function mostrarAreaAdmin() {
-    esconderTodasAsAreas();
-    document.getElementById('areaAdmin').classList.remove('hidden');
-    carregarPedidos();
+  esconderTodasAsAreas();
+  document.getElementById('areaAdmin').classList.remove('hidden');
+  carregarPedidos();
   listarProdutosAdmin();
-  listarProdutosAdmin();
-  }
+}
 
   function esconderTodasAsAreas() {
-    ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-    });
+  ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+});
   }
 
   function cadastrarCliente() {

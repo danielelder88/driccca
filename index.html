@@ -1,13 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>DRICCA COSMÉTICOS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRICCA COSMÉTICOS - Sistema Completo</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,360 +20,76 @@
   <header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md">
     <i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS
   </header>
-<div class="p-4 max-w-3xl w-full mx-auto">
-  <!-- Login -->
-  <div class="bg-white p-6 rounded shadow mt-6" id="loginCliente">
-    <h2 class="text-xl font-bold text-pink-600 mb-4">Login</h2>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="clienteEmail" placeholder="Email" type="email"/>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="clienteSenha" placeholder="Senha" type="password"/>
-    <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="loginCliente()">Entrar</button>
-    <button class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarCadastroCliente()">Cadastrar</button>
-    <button class="bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="recuperarSenha()">Esqueci a senha</button>
-  </div>
 
-  <!-- Cadastro -->
-  <div class="bg-white p-6 rounded shadow mt-6 hidden" id="cadastroCliente">
-    <h2 class="text-xl font-bold text-pink-600 mb-4">Cadastro de Cliente</h2>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="nomeCliente" placeholder="Nome" type="text"/>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="emailCliente" placeholder="Email" type="email"/>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="senhaCliente" placeholder="Senha" type="password"/>
-    <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarCliente()">Cadastrar</button>
-    <button class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarLoginCliente()">Voltar</button>
-  </div>
+  <button class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded mt-4 w-full" onclick="logoutCliente()">Sair</button>
 
-  <!-- Área do Cliente -->
-  <div class="bg-white p-6 rounded shadow mt-6 hidden" id="areaCliente">
-    <h2 class="text-xl font-bold text-pink-600 mb-4">Bem-vindo, <span id="nomeExibicao"></span></h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" id="produtosContainer"></div>
+  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Cadastrar/Editar Cupom</h3>
+  <input class="p-2 border rounded w-full mb-2" id="codigoCupom" placeholder="Código do cupom" type="text" />
+  <input class="p-2 border rounded w-full mb-2" id="descontoCupom" placeholder="Desconto (%)" type="number" />
+  <input class="p-2 border rounded w-full mb-2" id="validadeCupom" placeholder="Validade (YYYY-MM-DD)" type="date" />
+  <button class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="salvarCupom()">Salvar Cupom</button>
+  <div id="emailLink" class="mt-2"></div>
 
-    <h3 class="text-lg font-semibold mt-6 text-pink-600">Carrinho</h3>
-    <div id="carrinhoContainer"></div>
-    <div id="totalCarrinho" class="my-2 font-bold"></div>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="cupomInput" placeholder="Cupom de desconto" type="text"/>
-    <button class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
+  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Cupons Cadastrados</h3>
+  <div id="cuponsContainer" class="space-y-2"></div>
 
-    <h3 class="text-lg font-semibold mt-6 text-pink-600">Fale com o suporte</h3>
-    <textarea class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="mensagemSuporte" placeholder="Escreva sua dúvida..." rows="4"></textarea>
-    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="enviarMensagemSuporte()">Enviar Mensagem</button>
-  </div>
-</div>
-<!-- Painel Administrativo -->
-<div class="p-4 max-w-3xl w-full mx-auto hidden" id="areaAdmin">
-  <h2 class="text-xl font-bold text-pink-600 mb-4">Painel Administrativo</h2>
+  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Histórico de uso de Cupons</h3>
+  <div id="historicoCuponsContainer" class="space-y-2"></div>
 
-  <div id="painelVendas" class="mb-4 text-green-700 font-semibold"></div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
+      authDomain: "dricca-ecommerce.firebaseapp.com",
+      projectId: "dricca-ecommerce",
+      storageBucket: "dricca-ecommerce.appspot.com",
+      messagingSenderId: "202913391561",
+      appId: "1:202913391561:web:50cddc607a67540be4be18"
+    };
 
-  <h3 class="text-lg font-semibold text-pink-600 mb-2">Pedidos</h3>
-  <div id="pedidosContainer" class="space-y-2"></div>
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Cadastrar Produto</h3>
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoNome" placeholder="Nome do produto" type="text" />
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoDescricao" placeholder="Descrição" type="text" />
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoPreco" placeholder="Preço" type="number" />
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoQtd" placeholder="Quantidade" type="number" />
-  <input class="p-2 border rounded w-full mb-2 hidden" id="produtoImagem" type="hidden" />
-  <input accept="image/*" capture="environment" class="mb-2" id="inputImagem" onchange="uploadImagem(this)" type="file" />
+    function logoutCliente() {
+      auth.signOut().then(() => {
+        alert('Logout realizado com sucesso!');
+        location.reload();
+      });
+    }
 
-  <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
+    function salvarCupom() {
+      const codigo = document.getElementById('codigoCupom').value.trim().toUpperCase();
+      const desconto = parseFloat(document.getElementById('descontoCupom').value);
+      const validade = document.getElementById('validadeCupom').value;
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Gráfico de Vendas</h3>
-  <canvas id="graficoVendas" height="200"></canvas>
+      if (!codigo || isNaN(desconto) || !validade) {
+        alert('Preencha todos os campos do cupom.');
+        return;
+      }
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Mensagens de Suporte</h3>
-  <div id="mensagensSuporte" class="space-y-2"></div>
+      db.collection('cupons').add({ codigo, desconto, validade })
+        .then(() => {
+          alert('Cupom cadastrado com sucesso!');
+          listarCupons();
+        })
+        .catch(e => alert('Erro ao cadastrar: ' + e.message));
+    }
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Relatório</h3>
-  <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
-</div>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
-    authDomain: "dricca-ecommerce.firebaseapp.com",
-    projectId: "dricca-ecommerce",
-    storageBucket: "dricca-ecommerce.appspot.com",
-    messagingSenderId: "202913391561",
-    appId: "1:202913391561:web:50cddc607a67540be4be18"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  let usuarioAtual = null;
-  let carrinho = [];
-
-  function mostrarToast(msg) {
-    const toast = document.createElement("div");
-    toast.className = "fixed bottom-5 right-5 bg-pink-600 text-white py-2 px-4 rounded shadow-lg z-50";
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-  }
-
-  function mostrarCadastroCliente() {
-    esconderTodasAsAreas();
-    document.getElementById('cadastroCliente').classList.remove('hidden');
-  }
-
-  function mostrarLoginCliente() {
-    esconderTodasAsAreas();
-    document.getElementById('loginCliente').classList.remove('hidden');
-  }
-
-  function mostrarAreaCliente(nome) {
-    esconderTodasAsAreas();
-    document.getElementById('areaCliente').classList.remove('hidden');
-    document.getElementById('nomeExibicao').innerText = nome;
-    listarProdutos();
-  }
-
-  function mostrarAreaAdmin() {
-    esconderTodasAsAreas();
-    document.getElementById('areaAdmin').classList.remove('hidden');
-    carregarPedidos();
-  }
-
-  function esconderTodasAsAreas() {
-    ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-    });
-  }
-
-  function cadastrarCliente() {
-    const nome = document.getElementById('nomeCliente').value;
-    const email = document.getElementById('emailCliente').value;
-    const senha = document.getElementById('senhaCliente').value;
-    auth.createUserWithEmailAndPassword(email, senha)
-      .then(cred => db.collection("clientes").doc(cred.user.uid).set({ nome, email }))
-      .then(() => {
-        mostrarToast("Cadastro realizado!");
-        mostrarLoginCliente();
-      })
-      .catch(e => mostrarToast("Erro: " + e.message));
-  }
-
-  function loginCliente() {
-    const email = document.getElementById('clienteEmail').value;
-    const senha = document.getElementById('clienteSenha').value;
-    auth.signInWithEmailAndPassword(email, senha)
-      .then(cred => {
-        if (email === "admin@admin.com") {
-          mostrarAreaAdmin();
-        } else {
-          return db.collection("clientes").doc(cred.user.uid).get().then(doc => {
-            if (doc.exists) {
-              usuarioAtual = doc.data();
-              mostrarAreaCliente(usuarioAtual.nome);
-            }
-          });
-        }
-      })
-      .catch(e => mostrarToast("Erro: " + e.message));
-  }
-
-  function logoutCliente() {
-    auth.signOut().then(() => {
-      usuarioAtual = null;
-      carrinho = [];
-      mostrarLoginCliente();
-    });
-  }
-
-  function listarProdutos() {
-    const container = document.getElementById("produtosContainer");
-    container.innerHTML = "";
-    db.collection("produtos").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        const id = doc.id;
-        container.innerHTML += `
-          <div class="border p-3 rounded shadow">
-            <img src="${p.imagem}" class="w-full mb-2"/>
-            <strong>${p.nome}</strong><br>${p.descricao}<br>
-            <strong>R$ ${p.preco.toFixed(2)}</strong><br>Estoque: ${p.quantidade}<br><br>
-            <button class="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded" onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">Adicionar</button>
+    function listarCupons() {
+      db.collection('cupons').get().then(snapshot => {
+        const container = document.getElementById('cuponsContainer');
+        container.innerHTML = '';
+        snapshot.forEach(doc => {
+          const c = doc.data();
+          container.innerHTML += `<div class='border p-2 rounded shadow-sm bg-gray-50'>
+            <strong>${c.codigo}</strong> - ${c.desconto}% até ${c.validade}
           </div>`;
+        });
       });
-    });
-  }
-
-  function adicionarAoCarrinho(id, preco, nome) {
-    const existente = carrinho.find(i => i.id === id);
-    if (existente) existente.qtd++;
-    else carrinho.push({ id, nome, preco, qtd: 1 });
-    renderizarCarrinho();
-  }
-
-  function alterarQtd(id, delta) {
-    const item = carrinho.find(i => i.id === id);
-    if (item) {
-      item.qtd += delta;
-      if (item.qtd <= 0) removerDoCarrinho(id);
-      else renderizarCarrinho();
     }
-  }
 
-  function removerDoCarrinho(id) {
-    carrinho = carrinho.filter(i => i.id !== id);
-    renderizarCarrinho();
-  }
-
-  function renderizarCarrinho() {
-    const container = document.getElementById("carrinhoContainer");
-    container.innerHTML = "";
-    let total = 0;
-    carrinho.forEach(item => {
-      total += item.qtd * item.preco;
-      container.innerHTML += `<div class='my-2 p-2 border rounded'>
-        ${item.nome} (Qtd: ${item.qtd}) - R$ ${(item.qtd * item.preco).toFixed(2)}<br>
-        <button onclick="alterarQtd('${item.id}', -1)">–</button>
-        <button onclick="alterarQtd('${item.id}', 1)">+</button>
-        <button onclick="removerDoCarrinho('${item.id}')">Remover</button>
-      </div>`;
-    });
-    document.getElementById("totalCarrinho").innerText = "Total: R$ " + total.toFixed(2);
-  }
-</script>
-<script>
-  const { jsPDF } = window.jspdf;
-
-  function finalizarPedido() {
-    const cupom = document.getElementById("cupomInput").value.trim();
-    let total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
-    let msg = `Olá, sou ${usuarioAtual.nome}. Gostaria de fazer um pedido:%0A`;
-    const docPDF = new jsPDF();
-    docPDF.setFontSize(16);
-    docPDF.text("Pedido - Dricca Cosméticos", 10, 10);
-    docPDF.setFontSize(12);
-    let linha = 20;
-    docPDF.text(`Cliente: ${usuarioAtual.nome}`, 10, linha);
-    linha += 10;
-    carrinho.forEach(i => {
-      msg += `- ${i.nome} (Qtd: ${i.qtd})%0A`;
-      docPDF.text(`- ${i.nome} (Qtd: ${i.qtd}) - R$ ${(i.qtd * i.preco).toFixed(2)}`, 10, linha);
-      linha += 10;
-    });
-    if (cupom === "DESCONTO10") {
-      total *= 0.9;
-      msg += `Cupom aplicado: DESCONTO10 (10%% OFF)%0A`;
-      docPDF.text("Cupom aplicado: DESCONTO10 (10% OFF)", 10, linha);
-      linha += 10;
-    }
-    msg += `Total: R$ ${total.toFixed(2)}`;
-    docPDF.text(`Total: R$ ${total.toFixed(2)}`, 10, linha);
-    docPDF.save(`pedido_${usuarioAtual.nome}.pdf`);
-
-    carrinho.forEach(item => {
-      const ref = db.collection("produtos").doc(item.id);
-      ref.get().then(doc => {
-        if (doc.exists) {
-          const atual = doc.data().quantidade;
-          ref.update({ quantidade: atual - item.qtd });
-        }
-      });
-    });
-
-    db.collection("pedidos").add({ nome: usuarioAtual.nome, total: total.toFixed(2), data: new Date().toISOString(), itens: carrinho });
-    window.open(`https://wa.me/5593988098093?text=${msg}`, '_blank');
-    carrinho = [];
-    renderizarCarrinho();
-  }
-
-  function exportarRelatorioPedidos() {
-    db.collection("pedidos").orderBy("data", "desc").get().then(snapshot => {
-      const doc = new jsPDF();
-      doc.setFontSize(14);
-      doc.text("Relatório de Pedidos - Dricca Cosméticos", 10, 10);
-      let y = 20;
-      snapshot.forEach((docSnap, i) => {
-        const p = docSnap.data();
-        doc.setFontSize(12);
-        doc.text(`${i + 1}. ${p.nome} - R$ ${p.total} - ${p.data}`, 10, y);
-        y += 10;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      });
-      doc.save("relatorio_pedidos.pdf");
-    });
-  }
-
-  function enviarMensagemSuporte() {
-    const texto = document.getElementById("mensagemSuporte").value.trim();
-    if (!texto) return mostrarToast("Digite a mensagem antes de enviar.");
-    db.collection("suporte").add({
-      nome: usuarioAtual.nome,
-      mensagem: texto,
-      data: new Date().toISOString()
-    }).then(() => {
-      mostrarToast("Mensagem enviada!");
-      document.getElementById("mensagemSuporte").value = "";
-    });
-  }
-
-  function carregarPedidos() {
-    db.collection("pedidos").get().then(snapshot => {
-      let total = 0;
-      let container = document.getElementById("pedidosContainer");
-      let vendasPorMes = {};
-      container.innerHTML = "";
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        total += parseFloat(p.total);
-        const data = new Date(p.data);
-        const mes = data.toLocaleString('default', { month: 'short' }) + '/' + data.getFullYear();
-        vendasPorMes[mes] = (vendasPorMes[mes] || 0) + parseFloat(p.total);
-        container.innerHTML += `<div class='border p-2 rounded shadow-sm bg-gray-50'>${p.nome} - R$ ${p.total}<br><small>${p.data}</small></div>`;
-      });
-      document.getElementById("painelVendas").innerHTML = `Total de Vendas: R$ ${total.toFixed(2)}`;
-      const labels = Object.keys(vendasPorMes);
-      const dados = Object.values(vendasPorMes);
-      new Chart(document.getElementById("graficoVendas"), {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{ label: 'Vendas por mês', data: dados, backgroundColor: '#d63384' }]
-        }
-      });
-    });
-
-    db.collection("suporte").orderBy("data", "desc").get().then(snapshot => {
-      const suporteContainer = document.getElementById("mensagensSuporte");
-      suporteContainer.innerHTML = "";
-      snapshot.forEach(doc => {
-        const s = doc.data();
-        suporteContainer.innerHTML += `<div class='border p-2 rounded shadow-sm bg-white'><strong>${s.nome}</strong>: ${s.mensagem}<br><small>${s.data}</small></div>`;
-      });
-    });
-  }
-
-  function uploadImagem(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const storageRef = firebase.storage().ref();
-    const nomeArquivo = 'produtos/' + Date.now() + '_' + file.name;
-    const produtoImagemInput = document.getElementById("produtoImagem");
-
-    storageRef.child(nomeArquivo).put(file).then(snapshot => {
-      return snapshot.ref.getDownloadURL();
-    }).then(url => {
-      produtoImagemInput.value = url;
-      mostrarToast("Imagem enviada com sucesso!");
-    }).catch(e => mostrarToast("Erro ao enviar imagem: " + e.message));
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (user && user.email !== "admin@admin.com") {
-      db.collection("clientes").doc(user.uid).get().then(doc => {
-        if (doc.exists) {
-          usuarioAtual = doc.data();
-          mostrarAreaCliente(usuarioAtual.nome);
-        }
-      });
-    } else if (user && user.email === "admin@admin.com") {
-      mostrarAreaAdmin();
-    }
-  });
-</script>
+    listarCupons();
+  </script>
 </body>
 </html>

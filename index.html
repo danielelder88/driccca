@@ -76,9 +76,6 @@
   <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
 <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Produtos Cadastrados</h3>
 <div id="produtosAdminContainer" class="space-y-2"></div>
-<h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Produtos Cadastrados</h3>
-<div id="produtosAdminContainer" class="space-y-2"></div>
-
 
   
 
@@ -137,10 +134,9 @@
 }
 
   function esconderTodasAsAreas() {
-  ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
-});
+    ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
   }
 
   function cadastrarCliente() {
@@ -353,8 +349,7 @@
       document.getElementById("painelVendas").innerHTML = `Total de Vendas: R$ ${total.toFixed(2)}`;
       const labels = Object.keys(vendasPorMes);
       const dados = Object.values(vendasPorMes);
-      
-    });
+      });
 
     db.collection("suporte").orderBy("data", "desc").get().then(snapshot => {
       const suporteContainer = document.getElementById("mensagensSuporte");
@@ -393,7 +388,11 @@
       mostrarAreaAdmin();
     }
   });
+</script>
+</body>
+</html>
 
+<script>
 let produtoEditandoId = null;
 
 function listarProdutosAdmin() {
@@ -445,5 +444,3 @@ function limparCamposProduto() {
   document.getElementById("inputImagem").value = "";
 }
 </script>
-</body>
-</html>

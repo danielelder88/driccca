@@ -1,76 +1,69 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DRICCA COSMÉTICOS</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #fdfdfd; }
-    header { background: #d63384; color: white; padding: 15px; text-align: center; font-size: 1.5em; font-weight: bold; }
-    .container { padding: 20px; max-width: 900px; margin: auto; }
-    .hidden { display: none !important; }
-    input, button {
-      padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc;
-    }
-    button { background-color: #d63384; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #c2185b; }
-    .title { font-size: 1.2em; margin: 20px 0 10px; color: #d63384; }
-    .produto, .carrinho-item, .pedido-item {
-      background: white; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px;
-    }
-  </style>
-</head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DRICCA COSMÉTICOS</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdn.tailwindcss.com"></script></head>
 <body>
-  <header><i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS</header>
-  <div class="container">
-    <div id="loginCliente">
-      <h2 class="title">Login</h2>
-      <input type="email" id="clienteEmail" placeholder="Email">
-      <input type="password" id="clienteSenha" placeholder="Senha">
-      <button onclick="loginCliente()">Entrar</button>
-      <button onclick="mostrarCadastroCliente()">Cadastrar</button>
-    </div>
+<header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md"><i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS</header>
+<div class="p-4 max-w-3xl mx-auto">
+<div id="loginCliente">
+<h2 class="text-xl font-bold mt-4 text-pink-600">Login</h2>
+<input class="p-2 border rounded w-full mb-2" id="clienteEmail" placeholder="Email" type="email"/>
+<input class="p-2 border rounded w-full mb-2" id="clienteSenha" placeholder="Senha" type="password"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="loginCliente()">Entrar</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="mostrarCadastroCliente()">Cadastrar</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="recuperarSenha()">Esqueci a senha</button></div>
+<div class="hidden" id="cadastroCliente">
+<h2 class="text-xl font-bold mt-4 text-pink-600">Cadastro de Cliente</h2>
+<input class="p-2 border rounded w-full mb-2" id="nomeCliente" placeholder="Nome" type="text"/>
+<input class="p-2 border rounded w-full mb-2" id="emailCliente" placeholder="Email" type="email"/>
+<input class="p-2 border rounded w-full mb-2" id="senhaCliente" placeholder="Senha" type="password"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="cadastrarCliente()">Cadastrar</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="mostrarLoginCliente()">Voltar</button>
+</div>
+<div class="hidden" id="areaCliente">
+<h2 class="text-xl font-bold mt-4 text-pink-600">Bem-vindo, <span id="nomeExibicao"></span></h2>
+<div id="produtosContainer"></div>
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Carrinho</h3>
+<div id="carrinhoContainer"></div>
+<div id="totalCarrinho" style="margin:10px 0; font-weight:bold;"></div>
+<input class="p-2 border rounded w-full mb-2" id="cupomInput" placeholder="Cupom de desconto" type="text"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Fale com o suporte</h3>
+<textarea class="p-2 border rounded w-full mb-2" id="mensagemSuporte" placeholder="Escreva sua dúvida..." rows="4"></textarea>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="enviarMensagemSuporte()">Enviar Mensagem</button>
+</div>
+<div class="hidden" id="areaAdmin">
+<h2 class="text-xl font-bold mt-4 text-pink-600">Painel Administrativo</h2>
+<div id="painelVendas"></div>
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Pedidos</h3>
+<div id="pedidosContainer"></div>
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Cadastrar Produto</h3>
+<input class="p-2 border rounded w-full mb-2" id="produtoNome" placeholder="Nome do produto" type="text"/>
+<input class="p-2 border rounded w-full mb-2" id="produtoDescricao" placeholder="Descrição" type="text"/>
+<input class="p-2 border rounded w-full mb-2" id="produtoPreco" placeholder="Preço" type="number"/>
+<input class="p-2 border rounded w-full mb-2" id="produtoQtd" placeholder="Quantidade" type="number"/>
+<input class="p-2 border rounded w-full mb-2" id="produtoImagem" placeholder="URL da imagem" type="text"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="cadastrarProduto()">Cadastrar Produto</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Gráfico de Vendas</h3>
+<canvas height="200" id="graficoVendas" width="400"></canvas>
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Mensagens de Suporte</h3>
+<div id="mensagensSuporte"></div>
 
-    <div id="cadastroCliente" class="hidden">
-      <h2 class="title">Cadastro de Cliente</h2>
-      <input type="text" id="nomeCliente" placeholder="Nome">
-      <input type="email" id="emailCliente" placeholder="Email">
-      <input type="password" id="senhaCliente" placeholder="Senha">
-      <button onclick="cadastrarCliente()">Cadastrar</button>
-      <button onclick="mostrarLoginCliente()">Voltar</button>
-    </div>
-
-    <div id="areaCliente" class="hidden">
-      <h2 class="title">Bem-vindo, <span id="nomeExibicao"></span></h2>
-      <div id="produtosContainer"></div>
-      <h3 class="title">Carrinho</h3>
-      <div id="carrinhoContainer"></div>
-      <div id="totalCarrinho" style="margin:10px 0; font-weight:bold;"></div>
-      <input type="text" id="cupomInput" placeholder="Cupom de desconto">
-      <button onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
-      <button onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
-    </div>
-
-    <div id="areaAdmin" class="hidden">
-      <h2 class="title">Painel Administrativo</h2>
-      <div id="painelVendas"></div>
-      <h3 class="title">Pedidos</h3>
-      <div id="pedidosContainer"></div>
-      <h3 class="title">Cadastrar Produto</h3>
-      <input type="text" id="produtoNome" placeholder="Nome do produto">
-      <input type="text" id="produtoDescricao" placeholder="Descrição">
-      <input type="number" id="produtoPreco" placeholder="Preço">
-      <input type="number" id="produtoQtd" placeholder="Quantidade">
-      <input type="text" id="produtoImagem" placeholder="URL da imagem">
-      <button onclick="cadastrarProduto()">Cadastrar Produto</button>
-      <button onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
-    </div>
-  </div>
-
+<h3 class="text-lg font-semibold mt-6 text-pink-600">Relatório</h3>
+<button onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
+</div>
+</div>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
@@ -280,5 +273,131 @@
     }
   });
 </script>
-</body>
+<script>
+const { jsPDF } = window.jspdf;
+
+function recuperarSenha() {
+  const email = document.getElementById('clienteEmail').value;
+  if (!email) return alert("Digite seu email para recuperar a senha.");
+  auth.sendPasswordResetEmail(email).then(() => alert("Email de recuperação enviado!"))
+  .catch(e => alert("Erro: " + e.message));
+}
+
+function enviarMensagemSuporte() {
+  const texto = document.getElementById("mensagemSuporte").value.trim();
+  if (!texto) return alert("Digite a mensagem antes de enviar.");
+  db.collection("suporte").add({
+    nome: usuarioAtual.nome,
+    mensagem: texto,
+    data: new Date().toISOString()
+  }).then(() => {
+    alert("Mensagem enviada!");
+    document.getElementById("mensagemSuporte").value = "";
+  });
+}
+
+// Alterar carregarPedidos para adicionar gráfico e suporte
+carregarPedidos = function () {
+  db.collection("pedidos").get().then(snapshot => {
+    let total = 0;
+    let container = document.getElementById("pedidosContainer");
+    let vendasPorMes = {};
+    container.innerHTML = "";
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      total += parseFloat(p.total);
+      const data = new Date(p.data);
+      const mes = data.toLocaleString('default', { month: 'short' }) + '/' + data.getFullYear();
+      vendasPorMes[mes] = (vendasPorMes[mes] || 0) + parseFloat(p.total);
+      container.innerHTML += `<div class='pedido-item'>${p.nome} - R$ ${p.total}<br>${p.data}</div>`;
+    });
+    document.getElementById("painelVendas").innerHTML = `<strong>Total de Vendas:</strong> R$ ${total.toFixed(2)}`;
+    const labels = Object.keys(vendasPorMes);
+    const dados = Object.values(vendasPorMes);
+    new Chart(document.getElementById("graficoVendas"), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Vendas por mês',
+          data: dados,
+          backgroundColor: '#d63384'
+        }]
+      }
+    });
+  });
+
+  db.collection("suporte").orderBy("data", "desc").get().then(snapshot => {
+    let suporteContainer = document.getElementById("mensagensSuporte");
+    suporteContainer.innerHTML = "";
+    snapshot.forEach(doc => {
+      const s = doc.data();
+      suporteContainer.innerHTML += `<div class='pedido-item'><strong>${s.nome}</strong>: ${s.mensagem}<br>${s.data}</div>`;
+    });
+  });
+};
+
+// Atualizar finalizarPedido para gerar PDF
+const oldFinalizar = finalizarPedido;
+finalizarPedido = function () {
+  const cupom = document.getElementById("cupomInput").value.trim();
+  let total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
+  let msg = `Olá, sou ${usuarioAtual.nome}. Gostaria de fazer um pedido:%0A`;
+  const docPDF = new jsPDF();
+  docPDF.setFontSize(16);
+  docPDF.text("Pedido - Dricca Cosméticos", 10, 10);
+  docPDF.setFontSize(12);
+  let linha = 20;
+  docPDF.text(`Cliente: ${usuarioAtual.nome}`, 10, linha);
+  linha += 10;
+  carrinho.forEach(i => {
+    msg += `- ${i.nome} (Qtd: ${i.qtd})%0A`;
+    docPDF.text(`- ${i.nome} (Qtd: ${i.qtd}) - R$ ${(i.qtd * i.preco).toFixed(2)}`, 10, linha);
+    linha += 10;
+  });
+  if (cupom === "DESCONTO10") {
+    total *= 0.9;
+    msg += `Cupom aplicado: DESCONTO10 (10%% OFF)%0A`;
+    docPDF.text("Cupom aplicado: DESCONTO10 (10% OFF)", 10, linha);
+    linha += 10;
+  }
+  msg += `Total: R$ ${total.toFixed(2)}`;
+  docPDF.text(`Total: R$ ${total.toFixed(2)}`, 10, linha);
+  docPDF.save(`pedido_${usuarioAtual.nome}.pdf`);
+
+  carrinho.forEach(item => {
+    const ref = db.collection("produtos").doc(item.id);
+    ref.get().then(doc => {
+      if (doc.exists) {
+        const atual = doc.data().quantidade;
+        ref.update({ quantidade: atual - item.qtd });
+      }
+    });
+  });
+  db.collection("pedidos").add({ nome: usuarioAtual.nome, total: total.toFixed(2), data: new Date().toISOString(), itens: carrinho });
+  window.open(`https://wa.me/5593988098093?text=${msg}`, '_blank');
+  carrinho = [];
+  renderizarCarrinho();
+};
+</script><script>
+function exportarRelatorioPedidos() {
+  db.collection("pedidos").orderBy("data", "desc").get().then(snapshot => {
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("Relatório de Pedidos - Dricca Cosméticos", 10, 10);
+    let y = 20;
+    snapshot.forEach((docSnap, i) => {
+      const p = docSnap.data();
+      doc.setFontSize(12);
+      doc.text(`${i + 1}. ${p.nome} - R$ ${p.total} - ${p.data}`, 10, y);
+      y += 10;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+    doc.save("relatorio_pedidos.pdf");
+  });
+}
+</script></body>
 </html>

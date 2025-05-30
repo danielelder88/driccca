@@ -9,59 +9,57 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdn.tailwindcss.com"></script></head>
-<body>
+<body class="bg-gray-50 min-h-screen">
 <header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md"><i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS</header>
-<div class="p-4 max-w-3xl mx-auto">
-<div id="loginCliente">
-<h2 class="text-xl font-bold mt-4 text-pink-600">Login</h2>
-<input class="p-2 border rounded w-full mb-2" id="clienteEmail" placeholder="Email" type="email"/>
-<input class="p-2 border rounded w-full mb-2" id="clienteSenha" placeholder="Senha" type="password"/>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="loginCliente()">Entrar</button>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="mostrarCadastroCliente()">Cadastrar</button>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="recuperarSenha()">Esqueci a senha</button></div>
-<div class="hidden" id="cadastroCliente">
-<h2 class="text-xl font-bold mt-4 text-pink-600">Cadastro de Cliente</h2>
-<input class="p-2 border rounded w-full mb-2" id="nomeCliente" placeholder="Nome" type="text"/>
-<input class="p-2 border rounded w-full mb-2" id="emailCliente" placeholder="Email" type="email"/>
-<input class="p-2 border rounded w-full mb-2" id="senhaCliente" placeholder="Senha" type="password"/>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="cadastrarCliente()">Cadastrar</button>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="mostrarLoginCliente()">Voltar</button>
+<div class="p-4 max-w-3xl w-full mx-auto px-4">
+<div class="bg-white p-6 rounded shadow mt-6" id="loginCliente">
+<h2 class="text-xl font-bold mt-4 text-pink-600 text-xl font-bold text-pink-600 mt-4">Login</h2>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="clienteEmail" placeholder="Email" type="email"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="clienteSenha" placeholder="Senha" type="password"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="loginCliente()">Entrar</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarCadastroCliente()">Cadastrar</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="recuperarSenha()">Esqueci a senha</button></div>
+<div class="bg-white p-6 rounded shadow mt-6 hidden" id="cadastroCliente">
+<h2 class="text-xl font-bold mt-4 text-pink-600 text-xl font-bold text-pink-600 mt-4">Cadastro de Cliente</h2>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="nomeCliente" placeholder="Nome" type="text"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="emailCliente" placeholder="Email" type="email"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="senhaCliente" placeholder="Senha" type="password"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarCliente()">Cadastrar</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarLoginCliente()">Voltar</button>
 </div>
-<div class="hidden" id="areaCliente">
-<h2 class="text-xl font-bold mt-4 text-pink-600">Bem-vindo, <span id="nomeExibicao"></span></h2>
-<div id="produtosContainer"></div>
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Carrinho</h3>
+<div class="bg-white p-6 rounded shadow mt-6 hidden" id="areaCliente">
+<h2 class="text-xl font-bold mt-4 text-pink-600 text-xl font-bold text-pink-600 mt-4">Bem-vindo, <span id="nomeExibicao"></span></h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" id="produtosContainer"></div>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Carrinho</h3>
 <div id="carrinhoContainer"></div>
 <div id="totalCarrinho" style="margin:10px 0; font-weight:bold;"></div>
-<input class="p-2 border rounded w-full mb-2" id="cupomInput" placeholder="Cupom de desconto" type="text"/>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Fale com o suporte</h3>
-<textarea class="p-2 border rounded w-full mb-2" id="mensagemSuporte" placeholder="Escreva sua dúvida..." rows="4"></textarea>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="enviarMensagemSuporte()">Enviar Mensagem</button>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="cupomInput" placeholder="Cupom de desconto" type="text"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Fale com o suporte</h3>
+<textarea class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="mensagemSuporte" placeholder="Escreva sua dúvida..." rows="4"></textarea>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="enviarMensagemSuporte()">Enviar Mensagem</button>
 </div>
-<div class="hidden" id="areaAdmin">
-<h2 class="text-xl font-bold mt-4 text-pink-600">Painel Administrativo</h2>
+<div class="bg-white p-6 rounded shadow mt-6 hidden" id="areaAdmin">
+<h2 class="text-xl font-bold mt-4 text-pink-600 text-xl font-bold text-pink-600 mt-4">Painel Administrativo</h2>
 <div id="painelVendas"></div>
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Pedidos</h3>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Pedidos</h3>
 <div id="pedidosContainer"></div>
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Cadastrar Produto</h3>
-<input class="p-2 border rounded w-full mb-2" id="produtoNome" placeholder="Nome do produto" type="text"/>
-<input class="p-2 border rounded w-full mb-2" id="produtoDescricao" placeholder="Descrição" type="text"/>
-<input class="p-2 border rounded w-full mb-2" id="produtoPreco" placeholder="Preço" type="number"/>
-<input class="p-2 border rounded w-full mb-2" id="produtoQtd" placeholder="Quantidade" type="number"/>
-<input class="p-2 border rounded w-full mb-2" id="produtoImagem" placeholder="URL da imagem" type="text"/>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="cadastrarProduto()">Cadastrar Produto</button>
-<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Gráfico de Vendas</h3>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Cadastrar Produto</h3>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoNome" placeholder="Nome do produto" type="text"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoDescricao" placeholder="Descrição" type="text"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoPreco" placeholder="Preço" type="number"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoQtd" placeholder="Quantidade" type="number"/>
+<input class="p-2 border rounded w-full mb-2 f o c u s : o u t l i n e - n o n e f o c u s : r i n g - 2 f o c u s : r i n g - p i n k - 4 0 0" id="produtoImagem" placeholder="URL da imagem" type="text"/>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
+<button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="logoutCliente()" style="margin-top:10px;">Sair</button>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Gráfico de Vendas</h3>
 <canvas height="200" id="graficoVendas" width="400"></canvas>
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Mensagens de Suporte</h3>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Mensagens de Suporte</h3>
 <div id="mensagensSuporte"></div>
-
-<h3 class="text-lg font-semibold mt-6 text-pink-600">Relatório</h3>
-<button onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
+<h3 class="text-lg font-semibold mt-6 text-pink-600 text-lg font-semibold text-pink-600 mt-4">Relatório</h3>
+<button class="w-full" onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
 </div>
 </div>
 <script>
@@ -398,6 +396,34 @@ function exportarRelatorioPedidos() {
     });
     doc.save("relatorio_pedidos.pdf");
   });
+}
+</script><script>
+function mostrarCadastroCliente() {
+  esconderTodasAsAreas();
+  document.getElementById('cadastroCliente').classList.remove('hidden');
+}
+
+function mostrarLoginCliente() {
+  esconderTodasAsAreas();
+  document.getElementById('loginCliente').classList.remove('hidden');
+}
+
+function mostrarAreaCliente(nome) {
+  esconderTodasAsAreas();
+  document.getElementById('areaCliente').classList.remove('hidden');
+  document.getElementById('nomeExibicao').innerText = nome;
+  listarProdutos();
+}
+
+function mostrarAreaAdmin() {
+  esconderTodasAsAreas();
+  document.getElementById('areaAdmin').classList.remove('hidden');
+  carregarPedidos();
+}
+
+function esconderTodasAsAreas() {
+  const areas = ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'];
+  areas.forEach(id => document.getElementById(id).classList.add('hidden'));
 }
 </script></body>
 </html>

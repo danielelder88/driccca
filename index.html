@@ -1,382 +1,383 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>DRICCA COSMÉTICOS</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="theme-color" content="#d63384" />
-  <link rel="manifest" href="manifest.json" />
+  <meta charset="UTF-8">
+  <title>TABELA DE HORÁRIOS COMPLETA</title>
+
+  <!-- Firebase + html2pdf -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Arial Black', Arial, sans-serif;
+      background: #f0f0f0;
+      text-transform: uppercase;
+      padding: 5px;
+      font-size: 11px;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+    h1 { 
+      text-align: center; 
+      font-size: 16px; 
+      color: #222; 
+      border-bottom: 1px solid #ccc; 
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    .turno {
+      border-radius: 5px;
+      padding: 5px;
+      margin-bottom: 8px;
+      background: white;
+      border-left: 5px solid #333;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      max-width: 700px;
+      margin: auto;
+      border-bottom: 1px solid #ccc;
+    }
+    .turno h2 { 
+      font-size: 12px; 
+      font-weight: bold; 
+      margin: 5px 0; 
+      border-bottom: 1px solid #ccc; 
+      padding-bottom: 3px; 
+    }
+    .separador { border-left-color: #ff7043; background-color: #ffe0b2; }
+    .donoderua { border-left-color: #ffca28; background-color: #fff9c4; }
+    .checkout { border-left-color: #66bb6a; background-color: #c8e6c9; }
+    .empilhadores { 
+      border-left-color: #29b6f6; 
+      background-color: #b3e5fc; 
+      page-break-inside: avoid; 
+      overflow-wrap: break-word; 
+    }
+    .funcionarios-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: space-between;
+      border-top: 1px solid #ccc;
+      padding-top: 5px;
+    }
+    .funcionario {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+      width: calc(33% - 5px);
+      flex-wrap: wrap;
+      gap: 3px;
+      border: 1px solid #ddd;
+      padding: 3px;
+      border-radius: 4px;
+    }
+    .funcionario input {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 12px;
+      max-width: 160px;
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+      background-color: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .funcionario input:focus {
+      transform: scale(1.02);
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      border-color: #888;
+    }
+    .funcionario button {
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 2px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+    }
+    #controles {
+      margin-bottom: 10px;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 5px;
+      background: #fff;
+    }
+    #controles input, #controles select {
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 11px;
+    }
+    #controles button {
+      background: #0288d1;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    #logoPDF { display: none; }
+    .turno-empilhador { font-size: 9px; margin-left: 3px; color: #555; }
+    .input-separador { background-color: rgba(255, 224, 178, 0.4); }
+    .input-donoderua { background-color: rgba(255, 249, 196, 0.4); }
+    .input-checkout { background-color: rgba(200, 230, 201, 0.4); }
+    .input-empilhadores { background-color: rgba(179, 229, 252, 0.4); }
+    .input-horario-alt { border: 1px dotted #e57373; background-color: rgba(255, 200, 200, 0.2); }
+    .input-data, .input-horario { border: 1px solid #999; background-color: #f9f9f9; }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <header class="bg-pink-600 text-white py-4 text-center text-2xl font-bold flex justify-center items-center gap-2 shadow-md">
-    <i class="fa-solid fa-store"></i> DRICCA COSMÉTICOS
-  </header>
-<div class="p-4 max-w-3xl w-full mx-auto">
-  <!-- Login -->
-  <div class="bg-white p-6 rounded shadow mt-6" id="loginCliente">
-    <h2 class="text-xl font-bold text-pink-600 mb-4">Login</h2>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="clienteEmail" placeholder="Email" type="email"/>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="clienteSenha" placeholder="Senha" type="password"/>
-    <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="loginCliente()">Entrar</button>
-    <button class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarCadastroCliente()">Cadastrar</button>
-    <button class="bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="recuperarSenha()">Esqueci a senha</button>
-  </div>
+<body>
 
-  <!-- Cadastro -->
-  <div class="bg-white p-6 rounded shadow mt-6 hidden" id="cadastroCliente">
-    <h2 class="text-xl font-bold text-pink-600 mb-4">Cadastro de Cliente</h2>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="nomeCliente" placeholder="Nome" type="text"/>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="emailCliente" placeholder="Email" type="email"/>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="senhaCliente" placeholder="Senha" type="password"/>
-    <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarCliente()">Cadastrar</button>
-    <button class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded mt-2 w-full" onclick="mostrarLoginCliente()">Voltar</button>
-  </div>
+<img id="logoPDF" src="LOGO_DURÃES_VETORIZADA.png" alt="LOGO DURÃES" width="100">
+<h1>TABELA DE HORÁRIOS</h1>
+<div id="controles">
+  <input type="text" id="nomeNovo" placeholder="NOME">
+  <button type="button" id="btnEmoji">➕ Emojis</button>
+  <div id="emojiContainer" style="display:none;"></div>
 
-  <!-- Área do Cliente -->
-  <div class="bg-white p-6 rounded shadow mt-6 hidden" id="areaCliente">
-    <h2 class="text-xl font-bold text-pink-600 mb-4">Bem-vindo, <span id="nomeExibicao"></span></h2>
-<button class="text-sm text-gray-500 hover:text-pink-600 underline mb-4" onclick="logoutCliente()">Sair</button>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" id="produtosContainer"></div>
+  <select id="setorNovo">
+    <option value="separador1">SEPARADOR 1º TURNO</option>
+    <option value="separador2">SEPARADOR 2º TURNO</option>
+    <option value="donoderua1">DONO DE RUA 1º TURNO</option>
+    <option value="donoderua2">DONO DE RUA 2º TURNO</option>
+    <option value="checkout1">CHECKOUT 1º TURNO</option>
+    <option value="checkout2">CHECKOUT 2º TURNO</option>
+    <option value="empilhadores">EMPILHADORES</option>
+  </select>
 
-    <h3 class="text-lg font-semibold mt-6 text-pink-600">Carrinho</h3>
-    <div id="carrinhoContainer"></div>
-    <div id="totalCarrinho" class="my-2 font-bold"></div>
-    <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="cupomInput" placeholder="Cupom de desconto" type="text"/>
-    <button class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="finalizarPedido()">Finalizar Pedido (WhatsApp)</button>
-
-    <h3 class="text-lg font-semibold mt-6 text-pink-600">Fale com o suporte</h3>
-    <textarea class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="mensagemSuporte" placeholder="Escreva sua dúvida..." rows="4"></textarea>
-    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="enviarMensagemSuporte()">Enviar Mensagem</button>
-  </div>
+  <button onclick="adicionarFuncionario()">ADICIONAR</button>
+  <button onclick="gerarPDF()">PDF</button>
+  <button onclick="salvarDados()">SALVAR</button>
 </div>
-<!-- Painel Administrativo -->
-<div class="p-4 max-w-3xl w-full mx-auto hidden" id="areaAdmin">
-  <h2 class="text-xl font-bold text-pink-600 mb-4">Painel Administrativo</h2>
-<button class="text-sm text-gray-500 hover:text-pink-600 underline mb-4" onclick="logoutCliente()">Sair</button>
 
-  <div id="painelVendas" class="mb-4 text-green-700 font-semibold"></div>
+<div class="turno separador" id="separador1">
+  <h2>SEPARADOR - 1º TURNO</h2>
+  <div class="funcionarios-container"></div>
+</div>
 
-  <h3 class="text-lg font-semibold text-pink-600 mb-2">Pedidos</h3>
-  <div id="pedidosContainer" class="space-y-2"></div>
+<div class="turno separador" id="separador2">
+  <h2>SEPARADOR - 2º TURNO</h2>
+  <div class="funcionarios-container"></div>
+</div>
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Cadastrar Produto</h3>
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoNome" placeholder="Nome do produto" type="text" />
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoDescricao" placeholder="Descrição" type="text" />
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoPreco" placeholder="Preço" type="number" />
-  <input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="produtoQtd" placeholder="Quantidade" type="number" />
-  <input class="p-2 border rounded w-full mb-2 hidden" id="produtoImagem" type="hidden" />
-  <input accept="image/*" capture="environment" class="mb-2" id="inputImagem" onchange="uploadImagem(this)" type="file" />
-<input class="p-2 border rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-pink-400" id="imagemExterna" placeholder="URL da imagem externa (Drive ou Web)" type="text" oninput="usarImagemExterna()" />
-<img id="previewImagem" class="w-full h-48 object-contain mb-2 hidden border" />
+<div class="turno donoderua" id="donoderua1">
+  <h2>DONO DE RUA - 1º TURNO</h2>
+  <div class="funcionarios-container"></div>
+</div>
 
-  <button class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="cadastrarProduto()">Cadastrar Produto</button>
+<div class="turno donoderua" id="donoderua2">
+  <h2>DONO DE RUA - 2º TURNO</h2>
+  <div class="funcionarios-container"></div>
+</div>
 
-  
+<div class="turno checkout" id="checkout1">
+  <h2>CHECKOUT - 1º TURNO</h2>
+  <div class="funcionarios-container"></div>
+</div>
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Mensagens de Suporte</h3>
-  <div id="mensagensSuporte" class="space-y-2"></div>
+<div class="turno checkout" id="checkout2">
+  <h2>CHECKOUT - 2º TURNO</h2>
+  <div class="funcionarios-container"></div>
+</div>
 
-  <h3 class="text-lg font-semibold text-pink-600 mt-6 mb-2">Relatório</h3>
-  <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-2 w-full" onclick="exportarRelatorioPedidos()">Exportar Relatório (PDF)</button>
+<div class="turno empilhadores" id="empilhadores">
+  <h2>EMPILHADORES</h2>
+  <div class="funcionarios-container"></div>
 </div>
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAu0i-nJRJFhUmcB2NCYcueR0i7xGA4Rws",
-    authDomain: "dricca-ecommerce.firebaseapp.com",
-    projectId: "dricca-ecommerce",
-    storageBucket: "dricca-ecommerce.appspot.com",
-    messagingSenderId: "202913391561",
-    appId: "1:202913391561:web:50cddc607a67540be4be18"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAvtcqhy-bj1iOpBVcIPBjvNfYygjHSpAY",
+  authDomain: "horarios-duraes.firebaseapp.com",
+  projectId: "horarios-duraes",
+  storageBucket: "horarios-duraes.firebasestorage.app",
+  messagingSenderId: "801770957942",
+  appId: "1:801770957942:web:ce5d664d7f084281ac4357"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  let usuarioAtual = null;
-  let carrinho = [];
+function criarFuncionario(nome, setor, turno = 1, data = '', horario = '', horarioAlt = '') {
+  const div = document.createElement('div');
+  div.className = 'funcionario';
 
-  function mostrarToast(msg) {
-    const toast = document.createElement("div");
-    toast.className = "fixed bottom-5 right-5 bg-pink-600 text-white py-2 px-4 rounded shadow-lg z-50";
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+  const input = document.createElement('input');
+  input.value = nome;
+  input.setAttribute('maxlength', '50');
+
+  let inputClass = '';
+  if (setor.startsWith('separador')) inputClass = 'input-separador';
+  else if (setor.startsWith('donoderua')) inputClass = 'input-donoderua';
+  else if (setor.startsWith('checkout')) inputClass = 'input-checkout';
+  else if (setor === 'empilhadores') inputClass = 'input-empilhadores';
+
+  input.classList.add(inputClass);
+
+  const turnoSpan = document.createElement('span');
+  turnoSpan.className = 'turno-empilhador';
+  turnoSpan.textContent = setor === 'empilhadores' ? `(${turno}º TURNO)` : '';
+
+  const btnTroca = document.createElement('button');
+  btnTroca.textContent = '⇄';
+  btnTroca.onclick = () => moverFuncionario(div, setor, turnoSpan);
+
+  const btnExcluir = document.createElement('button');
+  btnExcluir.textContent = 'X';
+  btnExcluir.onclick = () => { if (confirm('Tem certeza?')) { div.remove(); ordenarFuncionarios(setor); } };
+
+  div.appendChild(input);
+  div.appendChild(turnoSpan);
+
+  if (setor === 'empilhadores') {
+    const inputData = document.createElement('input');
+    inputData.placeholder = 'DATA';
+    inputData.className = 'input-data';
+    inputData.value = data;
+
+    const inputHorario = document.createElement('input');
+    inputHorario.placeholder = 'HORÁRIO';
+    inputHorario.className = 'input-horario';
+    inputHorario.value = horario;
+
+    div.appendChild(inputData);
+    div.appendChild(inputHorario);
   }
 
-  function mostrarCadastroCliente() {
-    esconderTodasAsAreas();
-    document.getElementById('cadastroCliente').classList.remove('hidden');
+  if (setor.startsWith('checkout')) {
+    const inputHorarioAlt = document.createElement('input');
+    inputHorarioAlt.placeholder = 'HORÁRIO ALT.';
+    inputHorarioAlt.className = 'input-horario-alt';
+    inputHorarioAlt.value = horarioAlt;
+    div.appendChild(inputHorarioAlt);
   }
 
-  function mostrarLoginCliente() {
-    esconderTodasAsAreas();
-    document.getElementById('loginCliente').classList.remove('hidden');
-  }
+  div.appendChild(btnTroca);
+  div.appendChild(btnExcluir);
 
-  function mostrarAreaCliente(nome) {
-    esconderTodasAsAreas();
-    document.getElementById('areaCliente').classList.remove('hidden');
-    document.getElementById('nomeExibicao').innerText = nome;
-    listarProdutos();
-  }
+  document.getElementById(setor).querySelector('.funcionarios-container').appendChild(div);
+  ordenarFuncionarios(setor);
+}
 
-  function mostrarAreaAdmin() {
-    esconderTodasAsAreas();
-    document.getElementById('areaAdmin').classList.remove('hidden');
-    carregarPedidos();
+function adicionarFuncionario() {
+  const nome = document.getElementById('nomeNovo').value.trim();
+  const setor = document.getElementById('setorNovo').value;
+  if (nome) {
+    criarFuncionario(nome, setor);
+    document.getElementById('nomeNovo').value = '';
   }
+}
 
-  function esconderTodasAsAreas() {
-    ['loginCliente', 'cadastroCliente', 'areaCliente', 'areaAdmin'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-    });
-  }
-
-  function cadastrarCliente() {
-    const nome = document.getElementById('nomeCliente').value;
-    const email = document.getElementById('emailCliente').value;
-    const senha = document.getElementById('senhaCliente').value;
-    auth.createUserWithEmailAndPassword(email, senha)
-      .then(cred => db.collection("clientes").doc(cred.user.uid).set({ nome, email }))
-      .then(() => {
-        mostrarToast("Cadastro realizado!");
-        mostrarLoginCliente();
-      })
-      .catch(e => mostrarToast("Erro: " + e.message));
-  }
-
-  function loginCliente() {
-    const email = document.getElementById('clienteEmail').value;
-    const senha = document.getElementById('clienteSenha').value;
-    auth.signInWithEmailAndPassword(email, senha)
-      .then(cred => {
-        if (email === "admin@admin.com") {
-          mostrarAreaAdmin();
-        } else {
-          return db.collection("clientes").doc(cred.user.uid).get().then(doc => {
-            if (doc.exists) {
-              usuarioAtual = doc.data();
-              mostrarAreaCliente(usuarioAtual.nome);
-            }
-          });
-        }
-      })
-      .catch(e => mostrarToast("Erro: " + e.message));
-  }
-
-  function logoutCliente() {
-    auth.signOut().then(() => {
-      usuarioAtual = null;
-      carrinho = [];
-      mostrarLoginCliente();
-    });
-  }
-
-  function listarProdutos() {
-    const container = document.getElementById("produtosContainer");
-    container.innerHTML = "";
-    db.collection("produtos").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        const id = doc.id;
-        container.innerHTML += `
-          <div class="border p-3 rounded shadow">
-            <img src="${p.imagem}" class="w-full mb-2"/>
-            <strong>${p.nome}</strong><br>${p.descricao}<br>
-            <strong>R$ ${p.preco.toFixed(2)}</strong><br>Estoque: ${p.quantidade}<br><br>
-            <button class="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded" onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">Adicionar</button>
-          </div>`;
-      });
-    });
-  }
-
-  function adicionarAoCarrinho(id, preco, nome, estoque) {
-  const existente = carrinho.find(i => i.id === id);
-  if (existente) {
-    if (existente.qtd < estoque) {
-      existente.qtd++;
-    } else {
-      return mostrarToast("Estoque insuficiente.");
-    }
+function moverFuncionario(div, setor, turnoSpan) {
+  if (setor === 'empilhadores') {
+    let turnoAtual = parseInt(turnoSpan.textContent[1]);
+    turnoAtual = turnoAtual % 3 + 1;
+    turnoSpan.textContent = `(${turnoAtual}º TURNO)`;
+    ordenarFuncionarios(setor);
   } else {
-    carrinho.push({ id, nome, preco, qtd: 1, estoque });
+    const parent = div.parentElement.parentElement.id;
+    const proximo = parent === 'separador1' ? 'separador2' :
+                    parent === 'separador2' ? 'separador1' :
+                    parent === 'donoderua1' ? 'donoderua2' :
+                    parent === 'donoderua2' ? 'donoderua1' :
+                    parent === 'checkout1' ? 'checkout2' : 'checkout1';
+
+    document.getElementById(proximo).querySelector('.funcionarios-container').appendChild(div);
+    ordenarFuncionarios(proximo);
   }
-  renderizarCarrinho();
-});
-    renderizarCarrinho();
-  }
+}
 
-  function alterarQtd(id, delta) {
-    const item = carrinho.find(i => i.id === id);
-    if (item) {
-      item.qtd += delta;
-      if (item.qtd <= 0) removerDoCarrinho(id);
-      else renderizarCarrinho();
-    }
-  }
+function ordenarFuncionarios(setor) {
+  const container = document.getElementById(setor).querySelector('.funcionarios-container');
+  const funcionarios = Array.from(container.querySelectorAll('.funcionario'));
+  funcionarios.sort((a, b) => a.querySelector('input').value.localeCompare(b.querySelector('input').value));
+  funcionarios.forEach(f => container.appendChild(f));
+}
 
-  function removerDoCarrinho(id) {
-    carrinho = carrinho.filter(i => i.id !== id);
-    renderizarCarrinho();
-  }
+function gerarPDF() {
+  const clone = document.body.cloneNode(true);
+  clone.querySelector('#controles').remove();
 
-  function renderizarCarrinho() {
-    const container = document.getElementById("carrinhoContainer");
-    container.innerHTML = "";
-    let total = 0;
-    carrinho.forEach(item => {
-      total += item.qtd * item.preco;
-      container.innerHTML += `<div class='my-2 p-2 border rounded'>
-        ${item.nome} (Qtd: ${item.qtd}) - R$ ${(item.qtd * item.preco).toFixed(2)}<br>
-        <button onclick="alterarQtd('${item.id}', -1)">–</button>
-        <button onclick="alterarQtd('${item.id}', 1)">+</button>
-        <button onclick="removerDoCarrinho('${item.id}')">Remover</button>
-      </div>`;
-    });
-    document.getElementById("totalCarrinho").innerText = "Total: R$ " + total.toFixed(2);
-  }
-</script>
-<script>
-  const { jsPDF } = window.jspdf;
+  clone.querySelectorAll('.funcionario button').forEach(btn => btn.remove());
+  clone.querySelectorAll('.turno-empilhador').forEach(span => span.remove());
 
-  function finalizarPedido() {
-    const cupom = document.getElementById("cupomInput").value.trim();
-    let total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
-    let msg = `Olá, sou ${usuarioAtual.nome}. Gostaria de fazer um pedido:%0A`;
-    const docPDF = new jsPDF();
-    docPDF.setFontSize(16);
-    docPDF.text("Pedido - Dricca Cosméticos", 10, 10);
-    docPDF.setFontSize(12);
-    let linha = 20;
-    docPDF.text(`Cliente: ${usuarioAtual.nome}`, 10, linha);
-    linha += 10;
-    carrinho.forEach(i => {
-      msg += `- ${i.nome} (Qtd: ${i.qtd})%0A`;
-      docPDF.text(`- ${i.nome} (Qtd: ${i.qtd}) - R$ ${(i.qtd * i.preco).toFixed(2)}`, 10, linha);
-      linha += 10;
-    });
-    if (cupom === "DESCONTO10") {
-      total *= 0.9;
-      msg += `Cupom aplicado: DESCONTO10 (10%% OFF)%0A`;
-      docPDF.text("Cupom aplicado: DESCONTO10 (10% OFF)", 10, linha);
-      linha += 10;
-    }
-    msg += `Total: R$ ${total.toFixed(2)}`;
-    docPDF.text(`Total: R$ ${total.toFixed(2)}`, 10, linha);
-    docPDF.save(`pedido_${usuarioAtual.nome}.pdf`);
-
-    carrinho.forEach(item => {
-      const ref = db.collection("produtos").doc(item.id);
-      ref.get().then(doc => {
-        if (doc.exists) {
-          const atual = doc.data().quantidade;
-          ref.update({ quantidade: atual - item.qtd });
-        }
-      });
-    });
-
-    db.collection("pedidos").add({ nome: usuarioAtual.nome, total: total.toFixed(2), data: new Date().toISOString(), itens: carrinho });
-    window.open(`https://wa.me/5593988098093?text=${msg}`, '_blank');
-    carrinho = [];
-    renderizarCarrinho();
-  }
-
-  function exportarRelatorioPedidos() {
-    db.collection("pedidos").orderBy("data", "desc").get().then(snapshot => {
-      const doc = new jsPDF();
-      doc.setFontSize(14);
-      doc.text("Relatório de Pedidos - Dricca Cosméticos", 10, 10);
-      let y = 20;
-      snapshot.forEach((docSnap, i) => {
-        const p = docSnap.data();
-        doc.setFontSize(12);
-        doc.text(`${i + 1}. ${p.nome} - R$ ${p.total} - ${p.data}`, 10, y);
-        y += 10;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      });
-      doc.save("relatorio_pedidos.pdf");
-    });
-  }
-
-  function enviarMensagemSuporte() {
-    const texto = document.getElementById("mensagemSuporte").value.trim();
-    if (!texto) return mostrarToast("Digite a mensagem antes de enviar.");
-    db.collection("suporte").add({
-      nome: usuarioAtual.nome,
-      mensagem: texto,
-      data: new Date().toISOString()
-    }).then(() => {
-      mostrarToast("Mensagem enviada!");
-      document.getElementById("mensagemSuporte").value = "";
-    });
-  }
-
-  function carregarPedidos() {
-    db.collection("pedidos").get().then(snapshot => {
-      let total = 0;
-      let container = document.getElementById("pedidosContainer");
-      let vendasPorMes = {};
-      container.innerHTML = "";
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        total += parseFloat(p.total);
-        const data = new Date(p.data);
-        const mes = data.toLocaleString('default', { month: 'short' }) + '/' + data.getFullYear();
-        vendasPorMes[mes] = (vendasPorMes[mes] || 0) + parseFloat(p.total);
-        container.innerHTML += `<div class='border p-2 rounded shadow-sm bg-gray-50'>${p.nome} - R$ ${p.total}<br><small>${p.data}</small></div>`;
-      });
-      document.getElementById("painelVendas").innerHTML = `Total de Vendas: R$ ${total.toFixed(2)}`;
-      const labels = Object.keys(vendasPorMes);
-      const dados = Object.values(vendasPorMes);
-      });
-
-    db.collection("suporte").orderBy("data", "desc").get().then(snapshot => {
-      const suporteContainer = document.getElementById("mensagensSuporte");
-      suporteContainer.innerHTML = "";
-      snapshot.forEach(doc => {
-        const s = doc.data();
-        suporteContainer.innerHTML += `<div class='border p-2 rounded shadow-sm bg-white'><strong>${s.nome}</strong>: ${s.mensagem}<br><small>${s.data}</small></div>`;
-      });
-    });
-  }
-
-  function uploadImagem(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const storageRef = firebase.storage().ref();
-    const nomeArquivo = 'produtos/' + Date.now() + '_' + file.name;
-    const produtoImagemInput = document.getElementById("produtoImagem");
-
-    storageRef.child(nomeArquivo).put(file).then(snapshot => {
-      return snapshot.ref.getDownloadURL();
-    }).then(url => {
-      produtoImagemInput.value = url;
-      mostrarToast("Imagem enviada com sucesso!");
-    }).catch(e => mostrarToast("Erro ao enviar imagem: " + e.message));
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (user && user.email !== "admin@admin.com") {
-      db.collection("clientes").doc(user.uid).get().then(doc => {
-        if (doc.exists) {
-          usuarioAtual = doc.data();
-          mostrarAreaCliente(usuarioAtual.nome);
-        }
-      });
-    } else if (user && user.email === "admin@admin.com") {
-      mostrarAreaAdmin();
+  clone.querySelectorAll('.input-horario-alt').forEach(input => {
+    if (input.value.trim() === '') {
+      input.remove();
+    } else {
+      const span = document.createElement('span');
+      span.style = "display:inline-block; margin-left:5px; padding:2px 4px; border:1px solid #e57373; background:#ffe5e5; color:#e57373; font-weight:bold;";
+      span.textContent = input.value.trim();
+      input.parentNode.insertBefore(span, input.nextSibling);
+      input.remove();
     }
   });
+
+  const logo = document.getElementById('logoPDF').cloneNode();
+  logo.style.display = 'block';
+  clone.insertBefore(logo, clone.firstChild);
+
+  html2pdf().set({
+    margin: 5,
+    filename: 'tabela_horarios.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(clone).save();
+}
+
+function salvarDados() {
+  const dados = {};
+  document.querySelectorAll('.turno').forEach(turno => {
+    const id = turno.id;
+    dados[id] = { funcionarios: [] };
+    turno.querySelectorAll('.funcionario').forEach(f => {
+      const nome = f.querySelector('input').value;
+      const turnoEmp = f.querySelector('.turno-empilhador')?.textContent;
+      const data = f.querySelector('.input-data')?.value || '';
+      const horario = f.querySelector('.input-horario')?.value || '';
+      const horarioAlt = f.querySelector('.input-horario-alt')?.value || '';
+      dados[id].funcionarios.push({ nome, turno: turnoEmp, data, horario, horarioAlt });
+    });
+  });
+  db.collection("tabela").doc("horarios").set(dados).then(() => alert("DADOS SALVOS NO FIREBASE"));
+}
+
+window.onload = () => {
+  db.collection("tabela").doc("horarios").get().then(doc => {
+    if (doc.exists) {
+      const dados = doc.data();
+      for (let setor in dados) {
+        dados[setor].funcionarios.forEach(f => {
+          const turnoNum = f.turno ? parseInt(f.turno[1]) : 1;
+          criarFuncionario(f.nome, setor, turnoNum, f.data, f.horario, f.horarioAlt);
+        });
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnEmoji = document.getElementById('btnEmoji');
+  const emojiContainer = document.getElementById('emojiContainer');
+  const nomeInput = document.getElementById('nomeNovo');
+
+  btnEmoji.addEventListener('click', () => {
+    emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'flex' : 'none';
+  });
+
+  ['😀','😁','😂','🤣','😎','😍','🥰','😡','😢','😱','🤯','🙏','👊','👍','👎','✌️','🤟','👏','💪','🚀','⚡','🔥','🌟','🎯','🏆','🛠️','🎨','💼','🏅','🎁']
+    .forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.textContent = emoji;
+      btn.onclick = () => { nomeInput.value += emoji; nomeInput.focus(); emojiContainer.style.display = 'none'; };
+      emojiContainer.appendChild(btn);
+    });
+});
 </script>
 </body>
 </html>

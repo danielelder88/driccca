@@ -187,6 +187,8 @@
         container.innerHTML += `
           <div class="border p-3 rounded shadow">
             <img src="${p.imagem}" class="w-full mb-2"/>
+            <img id="previewImagem" class="w-32 h-32 object-cover rounded mb-2 hidden" />
+<progress id="barraProgresso" class="w-full mb-2 hidden" max="100" value="0"></progress>
             <strong>${p.nome}</strong><br>${p.descricao}<br>
             <strong>R$ ${p.preco.toFixed(2)}</strong><br>Estoque: ${p.quantidade}<br><br>
             <button class="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded" onclick="adicionarAoCarrinho('${id}', ${p.preco}, '${p.nome}')">Adicionar</button>
@@ -340,31 +342,54 @@
   }
 
   function uploadImagem(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const storageRef = firebase.storage().ref();
-    const nomeArquivo = 'produtos/' + Date.now() + '_' + file.name;
-    const produtoImagemInput = document.getElementById("produtoImagem");
+  const file = input.files[0];
+  if (!file) return;
 
-    storageRef.child(nomeArquivo).put(file).then(snapshot => {
-      return snapshot.ref.getDownloadURL();
-    }).then(url => {
-      produtoImagemInput.value = url;
-      mostrarToast("Imagem enviada com sucesso!");
-    }).catch(e => mostrarToast("Erro ao enviar imagem: " + e.message));
-  }
+  // Mostra preview da imagem
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const img = document.getElementById("previewImagem");
+    img.src = e.target.result;
+    img.classList.remove("hidden");
+  };
+  reader.readAsDataURL(file);
 
-  auth.onAuthStateChanged(user => {
-    if (user && user.email !== "admin@admin.com") {
-      db.collection("clientes").doc(user.uid).get().then(doc => {
-        if (doc.exists) {
-          usuarioAtual = doc.data();
-          mostrarAreaCliente(usuarioAtual.nome);
-        }
+  // Inicia upload
+  const storageRef = firebase.storage().ref();
+  const nomeArquivo = 'produtos/' + Date.now() + '_' + file.name;
+  const produtoImagemInput = document.getElementById("produtoImagem");
+  const barraProgresso = document.getElementById("barraProgresso");
+  const botaoCadastrar = document.querySelector("[onclick='cadastrarProduto()']");
+
+  barraProgresso.classList.remove("hidden");
+  botaoCadastrar.disabled = true;
+  botaoCadastrar.classList.add("opacity-50", "cursor-not-allowed");
+
+  const uploadTask = storageRef.child(nomeArquivo).put(file);
+
+  // Acompanhar progresso
+  uploadTask.on("state_changed",
+    snapshot => {
+      const progresso = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      barraProgresso.value = progresso;
+    },
+    error => {
+      mostrarToast("Erro ao enviar imagem: " + error.message);
+      barraProgresso.classList.add("hidden");
+      botaoCadastrar.disabled = false;
+      botaoCadastrar.classList.remove("opacity-50", "cursor-not-allowed");
+    },
+    () => {
+      uploadTask.snapshot.ref.getDownloadURL().then(url => {
+        produtoImagemInput.value = url;
+        mostrarToast("Imagem enviada com sucesso!");
+        barraProgresso.classList.add("hidden");
+        botaoCadastrar.disabled = false;
+        botaoCadastrar.classList.remove("opacity-50", "cursor-not-allowed");
       });
-    } else if (user && user.email === "admin@admin.com") {
-      mostrarAreaAdmin();
     }
+  );
+}
   });
 </script>
 </body>
